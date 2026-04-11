@@ -1,5 +1,6 @@
 import { render, screen, waitFor, act } from "@testing-library/react";
 import CurrentConditions from "./CurrentConditions";
+import { ImperialUnitStrategy } from "@/lib/units";
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
@@ -73,6 +74,25 @@ describe("CurrentConditions", () => {
     expect(screen.getByText("0.57")).toBeInTheDocument();         // rain: 2 decimals
     expect(screen.getByText("50124")).toBeInTheDocument();        // brightness: integer
     expect(screen.getByText("Last 11 km")).toBeInTheDocument();   // lightning distance: integer
+  });
+
+  it("converts values when imperial units provided", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockObservations),
+    });
+
+    render(<CurrentConditions stationId={123} units={new ImperialUnitStrategy()} />);
+
+    await waitFor(() => {
+      // 22.567°C → 72.6°F (1 decimal)
+      expect(screen.getByText("72.6")).toBeInTheDocument();
+    });
+
+    // Unit labels should be imperial
+    expect(screen.getByText("°F")).toBeInTheDocument();
+    expect(screen.getByText("mph")).toBeInTheDocument();
+    expect(screen.getByText("inHg")).toBeInTheDocument();
   });
 
   it("shows error with weather image and retry on fetch failure", async () => {

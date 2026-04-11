@@ -1,6 +1,12 @@
-const RANGES = ["24h", "7d", "30d", "1y"] as const;
+import type { TimeRange } from "@/lib/timeRanges";
 
-export type TimeRange = (typeof RANGES)[number];
+const RANGES: { id: TimeRange; label: string }[] = [
+  { id: "today", label: "Today" },
+  { id: "week", label: "This Week" },
+  { id: "month", label: "Past Month" },
+  { id: "last-month", label: "Last Month" },
+  { id: "year", label: "Past Year" },
+];
 
 export interface TimeRangeSelectorProps {
   selected: TimeRange;
@@ -12,18 +18,18 @@ export default function TimeRangeSelector({
   onChange,
 }: TimeRangeSelectorProps) {
   return (
-    <div className="flex gap-1" role="group" aria-label="Time range">
-      {RANGES.map((range) => (
+    <div className="flex flex-wrap gap-1" role="group" aria-label="Time range">
+      {RANGES.map(({ id, label }) => (
         <button
-          key={range}
-          onClick={() => onChange(range)}
+          key={id}
+          onClick={() => onChange(id)}
           className={`rounded px-3 py-1 text-sm font-medium transition-colors ${
-            selected === range
+            selected === id
               ? "bg-blue-500 text-white"
               : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
           }`}
         >
-          {range}
+          {label}
         </button>
       ))}
     </div>

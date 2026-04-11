@@ -4,7 +4,7 @@ import TimeRangeSelector from "./TimeRangeSelector";
 
 describe("TimeRangeSelector", () => {
   const defaultProps = {
-    selected: "24h" as const,
+    selected: "today" as const,
     onChange: jest.fn(),
   };
 
@@ -14,22 +14,23 @@ describe("TimeRangeSelector", () => {
 
   it("renders all range options", () => {
     render(<TimeRangeSelector {...defaultProps} />);
-    expect(screen.getByText("24h")).toBeInTheDocument();
-    expect(screen.getByText("7d")).toBeInTheDocument();
-    expect(screen.getByText("30d")).toBeInTheDocument();
-    expect(screen.getByText("1y")).toBeInTheDocument();
+    expect(screen.getByText("Today")).toBeInTheDocument();
+    expect(screen.getByText("This Week")).toBeInTheDocument();
+    expect(screen.getByText("Past Month")).toBeInTheDocument();
+    expect(screen.getByText("Last Month")).toBeInTheDocument();
+    expect(screen.getByText("Past Year")).toBeInTheDocument();
   });
 
-  it("calls onChange with selected range", async () => {
+  it("calls onChange with selected range id", async () => {
     const user = userEvent.setup();
     render(<TimeRangeSelector {...defaultProps} />);
-    await user.click(screen.getByText("7d"));
-    expect(defaultProps.onChange).toHaveBeenCalledWith("7d");
+    await user.click(screen.getByText("This Week"));
+    expect(defaultProps.onChange).toHaveBeenCalledWith("week");
   });
 
   it("highlights the selected range", () => {
-    render(<TimeRangeSelector {...defaultProps} selected="30d" />);
-    expect(screen.getByText("30d")).toHaveClass("bg-blue-500");
-    expect(screen.getByText("24h")).not.toHaveClass("bg-blue-500");
+    render(<TimeRangeSelector {...defaultProps} selected="month" />);
+    expect(screen.getByText("Past Month")).toHaveClass("bg-blue-500");
+    expect(screen.getByText("Today")).not.toHaveClass("bg-blue-500");
   });
 });

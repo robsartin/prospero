@@ -4,10 +4,12 @@ import { useState, useCallback } from "react";
 import Header from "@/components/Header";
 import NavTabs from "@/components/NavTabs";
 import StationPicker from "@/components/StationPicker";
+import UnitToggle from "@/components/UnitToggle";
 import CurrentConditions from "@/components/CurrentConditions";
 import ForecastStrip from "@/components/ForecastStrip";
 import HistoryView from "@/components/HistoryView";
 import type { Station } from "@/lib/types";
+import { useUnitPreference } from "@/hooks/useUnitPreference";
 
 function findTempestDeviceId(station: Station): number | null {
   const stDevice = station.devices?.find((d) => d.device_type === "ST");
@@ -18,6 +20,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState("Current");
   const [stationId, setStationId] = useState<number | null>(null);
   const [deviceId, setDeviceId] = useState<number | null>(null);
+  const { units, setUnits } = useUnitPreference();
 
   const handleStationSelect = useCallback((station: Station) => {
     setDeviceId(findTempestDeviceId(station));
@@ -26,22 +29,25 @@ export default function Home() {
   return (
     <div className="flex flex-col flex-1 min-h-screen bg-zinc-50 font-sans dark:bg-black">
       <Header>
-        <StationPicker
-          selectedStationId={stationId}
-          onStationChange={setStationId}
-          onStationSelect={handleStationSelect}
-        />
+        <div className="flex items-center gap-2">
+          <UnitToggle units={units} onChange={setUnits} />
+          <StationPicker
+            selectedStationId={stationId}
+            onStationChange={setStationId}
+            onStationSelect={handleStationSelect}
+          />
+        </div>
       </Header>
       <NavTabs activeTab={activeTab} onTabChange={setActiveTab} />
       <main className="flex-1 p-4 sm:p-6 lg:p-8">
         {activeTab === "Current" && (
-          <CurrentConditions stationId={stationId} />
+          <CurrentConditions stationId={stationId} units={units} />
         )}
         {activeTab === "Forecast" && (
           <ForecastStrip stationId={stationId} />
         )}
         {activeTab === "History" && (
-          <HistoryView deviceId={deviceId} />
+          <HistoryView deviceId={deviceId} units={units} />
         )}
       </main>
     </div>

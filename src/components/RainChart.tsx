@@ -15,9 +15,10 @@ interface RainChartProps {
   data: HistoryDataPoint[];
   unit: string;
   precision?: number;
+  domain?: [number, number];
 }
 
-export default function RainChart({ data, unit, precision = 2 }: RainChartProps) {
+export default function RainChart({ data, unit, precision = 2, domain }: RainChartProps) {
   if (data.length === 0) {
     return <p className="text-zinc-500">No rain data available.</p>;
   }
@@ -31,7 +32,7 @@ export default function RainChart({ data, unit, precision = 2 }: RainChartProps)
         <AreaChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="time" tick={{ fontSize: 12 }} />
-          <YAxis tick={{ fontSize: 12 }} tickFormatter={fmt} />
+          <YAxis tick={{ fontSize: 12 }} tickFormatter={fmt} domain={domain} />
           <Tooltip formatter={(v) => [fmt(Number(v)), "Rain"]} />
           <Area
             type="monotone"
