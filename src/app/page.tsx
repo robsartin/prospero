@@ -44,7 +44,7 @@ export default function Home() {
           <CurrentConditions stationId={stationId} units={units} />
         )}
         {activeTab === "Forecast" && (
-          <ForecastStrip stationId={stationId} />
+          <ForecastStrip stationId={stationId} units={units} />
         )}
         {activeTab === "History" && (
           <HistoryView deviceId={deviceId} units={units} />

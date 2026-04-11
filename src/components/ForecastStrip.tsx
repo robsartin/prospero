@@ -3,12 +3,15 @@
 import { useCallback, useEffect, useState } from "react";
 import { ForecastDay } from "./ForecastDay";
 import ErrorDisplay from "./ErrorDisplay";
+import { MetricUnitStrategy, type UnitStrategy } from "@/lib/units";
 import type { ForecastResponse } from "@/lib/types";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DEFAULT_UNITS = new MetricUnitStrategy();
 
 interface ForecastStripProps {
   stationId: number | null;
+  units?: UnitStrategy;
 }
 
 async function fetchForecastData(
@@ -23,7 +26,7 @@ async function fetchForecastData(
   return res.json();
 }
 
-export default function ForecastStrip({ stationId }: ForecastStripProps) {
+export default function ForecastStrip({ stationId, units = DEFAULT_UNITS }: ForecastStripProps) {
   const [data, setData] = useState<ForecastResponse | null>(null);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -89,8 +92,8 @@ export default function ForecastStrip({ stationId }: ForecastStripProps) {
             dayLabel={dayLabel}
             icon={day.icon}
             conditions={day.conditions}
-            highTemp={day.air_temp_high}
-            lowTemp={day.air_temp_low}
+            highTemp={units.temp(day.air_temp_high)}
+            lowTemp={units.temp(day.air_temp_low)}
             precipProbability={day.precip_probability}
           />
         );
