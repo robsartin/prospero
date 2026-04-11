@@ -4,6 +4,7 @@ import { ForecastDay } from "./ForecastDay";
 describe("ForecastDay", () => {
   const defaultProps = {
     dayLabel: "Mon",
+    icon: "partly-cloudy-day",
     conditions: "Partly Cloudy",
     highTemp: 28.567,
     lowTemp: 18.234,
@@ -15,15 +16,25 @@ describe("ForecastDay", () => {
     expect(screen.getByText("Mon")).toBeInTheDocument();
   });
 
+  it("renders weather emoji based on icon", () => {
+    render(<ForecastDay {...defaultProps} icon="rainy" conditions="Rain" />);
+    expect(screen.getByTestId("weather-emoji")).toHaveTextContent("🌧️");
+  });
+
+  it("renders freezing emoji for very cold days", () => {
+    render(<ForecastDay {...defaultProps} highTemp={-5} />);
+    expect(screen.getByTestId("weather-emoji")).toHaveTextContent("🥶");
+  });
+
   it("renders high and low temperatures with 1 decimal", () => {
     render(<ForecastDay {...defaultProps} />);
     expect(screen.getByText("28.6°")).toBeInTheDocument();
     expect(screen.getByText("18.2°")).toBeInTheDocument();
   });
 
-  it("renders conditions text", () => {
+  it("shows conditions as title on emoji", () => {
     render(<ForecastDay {...defaultProps} />);
-    expect(screen.getByText("Partly Cloudy")).toBeInTheDocument();
+    expect(screen.getByTestId("weather-emoji")).toHaveAttribute("title", "Partly Cloudy");
   });
 
   it("renders precip probability when > 0", () => {
