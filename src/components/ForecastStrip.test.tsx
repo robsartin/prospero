@@ -75,13 +75,16 @@ describe("ForecastStrip", () => {
     expect(screen.getByText("Rainy")).toBeInTheDocument();
   });
 
-  it("shows error on fetch failure", async () => {
+  it("shows error on fetch failure with weather image and retry", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 500 });
 
     render(<ForecastStrip stationId={123} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId("error")).toBeInTheDocument();
+      expect(screen.getByRole("img")).toBeInTheDocument();
     });
+
+    expect(screen.getByText(/rough weather/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
   });
 });

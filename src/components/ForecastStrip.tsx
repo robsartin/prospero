@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { ForecastDay } from "./ForecastDay";
+import ErrorDisplay from "./ErrorDisplay";
 import type { ForecastResponse } from "@/lib/types";
 
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
@@ -15,7 +16,10 @@ async function fetchForecastData(
   signal: AbortSignal
 ): Promise<ForecastResponse> {
   const res = await fetch(`/api/forecast?station_id=${stationId}`, { signal });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${res.status}`);
+  }
   return res.json();
 }
 
@@ -59,7 +63,15 @@ export default function ForecastStrip({ stationId }: ForecastStripProps) {
   }
 
   if (error) {
-    return <p data-testid="error" className="text-red-500">Error: {error}</p>;
+    return (
+      <ErrorDisplay
+        message={error}
+        onRetry={() => {
+          const controller = new AbortController();
+          load(stationId, controller.signal);
+        }}
+      />
+    );
   }
 
   if (!data || !data.forecast?.daily?.length) {

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { MetricCard } from "./MetricCard";
+import ErrorDisplay from "./ErrorDisplay";
 import type { ObservationsResponse } from "@/lib/types";
 
 interface CurrentConditionsProps {
@@ -13,7 +14,10 @@ async function fetchConditions(
   signal: AbortSignal
 ): Promise<ObservationsResponse> {
   const res = await fetch(`/api/observations?station_id=${stationId}`, { signal });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${res.status}`);
+  }
   return res.json();
 }
 
@@ -69,7 +73,15 @@ export default function CurrentConditions({ stationId }: CurrentConditionsProps)
   }
 
   if (error) {
-    return <p data-testid="error" className="text-red-500">Error: {error}</p>;
+    return (
+      <ErrorDisplay
+        message={error}
+        onRetry={() => {
+          const controller = new AbortController();
+          load(stationId, controller.signal);
+        }}
+      />
+    );
   }
 
   if (!data || !data.obs || data.obs.length === 0) {
