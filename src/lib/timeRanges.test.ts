@@ -1,4 +1,4 @@
-import { getTimeRange, chunkTimeRange, type TimeRange } from "./timeRanges";
+import { getTimeRange, chunkTimeRange } from "./timeRanges";
 
 const FIVE_DAYS = 5 * 86400;
 
