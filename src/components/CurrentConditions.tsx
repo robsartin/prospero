@@ -4,10 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import { MetricCard } from "./MetricCard";
 import ErrorDisplay from "./ErrorDisplay";
 import { formatValue } from "@/lib/format";
+import { MetricUnitStrategy, type UnitStrategy } from "@/lib/units";
 import type { ObservationsResponse } from "@/lib/types";
 
 interface CurrentConditionsProps {
   stationId: number | null;
+  units?: UnitStrategy;
 }
 
 async function fetchConditions(
@@ -24,7 +26,9 @@ async function fetchConditions(
 
 const REFRESH_INTERVAL = 60000;
 
-export default function CurrentConditions({ stationId }: CurrentConditionsProps) {
+const DEFAULT_UNITS = new MetricUnitStrategy();
+
+export default function CurrentConditions({ stationId, units = DEFAULT_UNITS }: CurrentConditionsProps) {
   const [data, setData] = useState<ObservationsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
@@ -101,26 +105,26 @@ export default function CurrentConditions({ stationId }: CurrentConditionsProps)
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
       <MetricCard
         label="Temperature"
-        value={formatValue("temperature", obs.air_temperature)}
-        unit="°C"
-        secondary={obs.feels_like != null ? `Feels ${formatValue("feels_like", obs.feels_like)}°` : undefined}
+        value={formatValue("temperature", units.temp(obs.air_temperature))}
+        unit={units.labels.temp}
+        secondary={obs.feels_like != null ? `Feels ${formatValue("feels_like", units.temp(obs.feels_like))}°` : undefined}
       />
       <MetricCard
         label="Wind"
-        value={formatValue("wind", obs.wind_avg)}
-        unit="m/s"
-        secondary={obs.wind_gust != null ? `Gust ${formatValue("wind", obs.wind_gust)}` : undefined}
+        value={formatValue("wind", units.wind(obs.wind_avg))}
+        unit={units.labels.wind}
+        secondary={obs.wind_gust != null ? `Gust ${formatValue("wind", units.wind(obs.wind_gust))}` : undefined}
       />
       <MetricCard
         label="Humidity"
         value={formatValue("humidity", obs.relative_humidity)}
         unit="%"
-        secondary={obs.dew_point != null ? `Dew ${formatValue("dew_point", obs.dew_point)}°` : undefined}
+        secondary={obs.dew_point != null ? `Dew ${formatValue("dew_point", units.temp(obs.dew_point))}°` : undefined}
       />
       <MetricCard
         label="Pressure"
-        value={formatValue("pressure", obs.sea_level_pressure)}
-        unit="mb"
+        value={formatValue("pressure", units.pressure(obs.sea_level_pressure))}
+        unit={units.labels.pressure}
         secondary={obs.pressure_trend ?? undefined}
       />
       <MetricCard
@@ -131,8 +135,8 @@ export default function CurrentConditions({ stationId }: CurrentConditionsProps)
       />
       <MetricCard
         label="Rain Today"
-        value={formatValue("rain", obs.precip_accum_local_day)}
-        unit="mm"
+        value={formatValue("rain", units.rain(obs.precip_accum_local_day))}
+        unit={units.labels.rain}
       />
       <MetricCard
         label="Lightning"
