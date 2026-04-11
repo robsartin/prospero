@@ -17,10 +17,13 @@ async function fetchConditions(
   return res.json();
 }
 
+const REFRESH_INTERVAL = 60000;
+
 export default function CurrentConditions({ stationId }: CurrentConditionsProps) {
   const [data, setData] = useState<ObservationsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const load = useCallback(async (id: number, signal: AbortSignal) => {
     setPending(true);
@@ -29,6 +32,7 @@ export default function CurrentConditions({ stationId }: CurrentConditionsProps)
       if (!signal.aborted) {
         setData(json);
         setError(null);
+        setLastUpdated(new Date());
       }
     } catch (err) {
       if (!signal.aborted && err instanceof Error && err.name !== "AbortError") {
@@ -45,7 +49,15 @@ export default function CurrentConditions({ stationId }: CurrentConditionsProps)
     if (!stationId) return;
     const controller = new AbortController();
     load(stationId, controller.signal);
-    return () => controller.abort();
+
+    const interval = setInterval(() => {
+      load(stationId, controller.signal);
+    }, REFRESH_INTERVAL);
+
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+    };
   }, [stationId, load]);
 
   if (!stationId) {
@@ -67,6 +79,12 @@ export default function CurrentConditions({ stationId }: CurrentConditionsProps)
   const obs = data.obs[0];
 
   return (
+    <div>
+      {lastUpdated && (
+        <p data-testid="last-updated" className="mb-3 text-xs text-zinc-400">
+          Last updated: {lastUpdated.toLocaleTimeString()}
+        </p>
+      )}
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
       <MetricCard
         label="Temperature"
@@ -118,6 +136,7 @@ export default function CurrentConditions({ stationId }: CurrentConditionsProps)
         value={obs.brightness ?? "--"}
         unit="lux"
       />
+    </div>
     </div>
   );
 }

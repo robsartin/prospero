@@ -1,8 +1,16 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { render, screen, waitFor, act } from "@testing-library/react";
 import CurrentConditions from "./CurrentConditions";
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
+
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
+afterEach(() => {
+  jest.useRealTimers();
+});
 
 const mockObservations = {
   station_id: 123,
@@ -92,5 +100,41 @@ describe("CurrentConditions", () => {
         expect.objectContaining({ signal: expect.any(AbortSignal) })
       );
     });
+  });
+
+  it("shows last-updated timestamp after data loads", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockObservations),
+    });
+
+    render(<CurrentConditions stationId={123} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("last-updated")).toBeInTheDocument();
+    });
+
+    expect(screen.getByTestId("last-updated").textContent).toMatch(/Last updated:/);
+  });
+
+  it("auto-refreshes after 60 seconds", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockObservations),
+    });
+
+    render(<CurrentConditions stationId={123} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("22.5")).toBeInTheDocument();
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      jest.advanceTimersByTime(60000);
+    });
+
+    expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 });
