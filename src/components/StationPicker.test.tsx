@@ -73,6 +73,34 @@ describe("StationPicker", () => {
     });
   });
 
+  it("auto-selects first station when none selected", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockStations),
+    });
+
+    render(<StationPicker {...defaultProps} selectedStationId={null} />);
+
+    await waitFor(() => {
+      expect(defaultProps.onStationChange).toHaveBeenCalledWith(1);
+    });
+  });
+
+  it("does not auto-select when a station is already selected", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockStations),
+    });
+
+    render(<StationPicker {...defaultProps} selectedStationId={2} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Home Station")).toBeInTheDocument();
+    });
+
+    expect(defaultProps.onStationChange).not.toHaveBeenCalled();
+  });
+
   it("fetches from /api/stations", async () => {
     mockFetch.mockResolvedValue({
       ok: true,
