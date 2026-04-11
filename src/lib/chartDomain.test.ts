@@ -19,11 +19,11 @@ describe("tempDomain", () => {
 describe("pressureDomain", () => {
   it("returns 28-31 fixed range", () => {
     const data = [{ time: "", value: 29.5 }, { time: "", value: 30.1 }];
-    expect(pressureDomain(data)).toEqual([28, 31]);
+    expect(pressureDomain()).toEqual([28, 31]);
   });
 
   it("returns 28-31 for empty data", () => {
-    expect(pressureDomain([])).toEqual([28, 31]);
+    expect(pressureDomain()).toEqual([28, 31]);
   });
 });
 
