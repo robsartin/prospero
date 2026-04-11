@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import ForecastStrip from "./ForecastStrip";
+import { ImperialUnitStrategy } from "@/lib/units";
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
@@ -75,6 +76,23 @@ describe("ForecastStrip", () => {
     expect(emojis).toHaveLength(2);
     expect(emojis[0]).toHaveAttribute("title", "Clear");
     expect(emojis[1]).toHaveAttribute("title", "Rainy");
+  });
+
+  it("converts temperatures when imperial units provided", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockForecast),
+    });
+
+    render(<ForecastStrip stationId={123} units={new ImperialUnitStrategy()} />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("forecast-strip")).toBeInTheDocument();
+    });
+
+    // 28°C → 82.4°F, 18°C → 64.4°F
+    expect(screen.getByText("82.4°")).toBeInTheDocument();
+    expect(screen.getByText("64.4°")).toBeInTheDocument();
   });
 
   it("shows error on fetch failure with weather image and retry", async () => {
