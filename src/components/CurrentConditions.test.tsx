@@ -87,7 +87,10 @@ describe("CurrentConditions", () => {
     render(<CurrentConditions stationId={456} />);
 
     await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith("/api/observations?station_id=456");
+      expect(mockFetch).toHaveBeenCalledWith(
+        "/api/observations?station_id=456",
+        expect.objectContaining({ signal: expect.any(AbortSignal) })
+      );
     });
   });
 });

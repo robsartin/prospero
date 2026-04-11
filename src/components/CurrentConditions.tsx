@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { MetricCard } from "./MetricCard";
 import type { ObservationsResponse } from "@/lib/types";
 
@@ -8,32 +8,51 @@ interface CurrentConditionsProps {
   stationId: number | null;
 }
 
+async function fetchConditions(
+  stationId: number,
+  signal: AbortSignal
+): Promise<ObservationsResponse> {
+  const res = await fetch(`/api/observations?station_id=${stationId}`, { signal });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 export default function CurrentConditions({ stationId }: CurrentConditionsProps) {
   const [data, setData] = useState<ObservationsResponse | null>(null);
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
+
+  const load = useCallback(async (id: number, signal: AbortSignal) => {
+    setPending(true);
+    try {
+      const json = await fetchConditions(id, signal);
+      if (!signal.aborted) {
+        setData(json);
+        setError(null);
+      }
+    } catch (err) {
+      if (!signal.aborted && err instanceof Error && err.name !== "AbortError") {
+        setError(err.message);
+      }
+    } finally {
+      if (!signal.aborted) {
+        setPending(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!stationId) return;
-
-    setLoading(true);
-    setError(null);
-
-    fetch(`/api/observations?station_id=${stationId}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((json) => setData(json))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [stationId]);
+    const controller = new AbortController();
+    load(stationId, controller.signal);
+    return () => controller.abort();
+  }, [stationId, load]);
 
   if (!stationId) {
     return <p className="text-zinc-500">Select a station to view conditions.</p>;
   }
 
-  if (loading) {
+  if (pending) {
     return <p data-testid="loading">Loading conditions...</p>;
   }
 
