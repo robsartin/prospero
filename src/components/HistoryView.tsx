@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import TimeRangeSelector, { type TimeRange } from "./TimeRangeSelector";
 import HistoryChart, { type HistoryDataPoint } from "./HistoryChart";
+import RainChart from "./RainChart";
 import type { ObservationsResponse, StationObservation } from "@/lib/types";
 
 interface HistoryViewProps {
@@ -112,6 +113,16 @@ export default function HistoryView({ stationId }: HistoryViewProps) {
             label="Wind"
             unit="m/s"
             color="#10b981"
+          />
+          <HistoryChart
+            data={toChartData(obs, "relative_humidity", range)}
+            label="Humidity"
+            unit="%"
+            color="#8b5cf6"
+          />
+          <RainChart
+            data={toChartData(obs, "precip", range)}
+            unit="mm"
           />
         </div>
       )}

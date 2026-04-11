@@ -5,6 +5,7 @@ export interface MetricCardProps {
   icon?: string;
   secondary?: string;
   className?: string;
+  severityColor?: string;
 }
 
 export function MetricCard({
@@ -14,10 +15,12 @@ export function MetricCard({
   icon,
   secondary,
   className = "",
+  severityColor,
 }: MetricCardProps) {
+  const borderClass = severityColor ?? "border-gray-200";
   return (
     <div
-      className={`rounded-xl border border-gray-200 bg-white p-4 shadow-sm ${className}`.trim()}
+      className={`rounded-xl border ${borderClass} bg-white p-4 shadow-sm ${className}`.trim()}
     >
       <div className="flex items-center gap-2">
         {icon && (
