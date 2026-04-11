@@ -30,6 +30,9 @@ export default function StationPicker({
       if (!signal.aborted) {
         setStations(result);
         setError(null);
+        if (!selectedStationId && result.length > 0) {
+          onStationChange(result[0].station_id);
+        }
       }
     } catch (err) {
       if (!signal.aborted && err instanceof Error && err.name !== "AbortError") {
@@ -40,7 +43,7 @@ export default function StationPicker({
         setPending(false);
       }
     }
-  }, []);
+  }, [selectedStationId, onStationChange]);
 
   useEffect(() => {
     const controller = new AbortController();
