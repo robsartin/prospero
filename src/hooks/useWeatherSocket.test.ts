@@ -61,6 +61,24 @@ describe("useWeatherSocket", () => {
     expect(mockDisconnect).toHaveBeenCalled();
   });
 
+  it("updates connectionState when state changes", () => {
+    const { result } = renderHook(() =>
+      useWeatherSocket({ token: "test-token", deviceId: 123 })
+    );
+
+    act(() => {
+      capturedOnStateChange?.("open");
+    });
+
+    expect(result.current.connectionState).toBe("open");
+
+    act(() => {
+      capturedOnStateChange?.("error");
+    });
+
+    expect(result.current.connectionState).toBe("error");
+  });
+
   it("does not connect without token", () => {
     renderHook(() =>
       useWeatherSocket({ token: null, deviceId: 123 })
