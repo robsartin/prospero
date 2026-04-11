@@ -18,7 +18,6 @@ jest.mock("recharts", () => ({
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
-// API now returns TransformedObservation[] (camelCase, from transforms.ts)
 const mockHistory = [
   {
     timestamp: 1681000000,
@@ -105,6 +104,29 @@ describe("HistoryView", () => {
     expect(url).toContain("device_id=456");
   });
 
+  it("makes multiple requests for ranges > 5 days", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockHistory),
+    });
+
+    render(<HistoryView deviceId={456} />);
+
+    // Default is "today" — single chunk
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalledTimes(1);
+    });
+
+    // Switch to "Past Year" — should make multiple requests (365/5 = 73 chunks)
+    mockFetch.mockClear();
+    const user = userEvent.setup();
+    await user.click(screen.getByText("Past Year"));
+
+    await waitFor(() => {
+      expect(mockFetch.mock.calls.length).toBeGreaterThan(1);
+    });
+  });
+
   it("shows error on fetch failure", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 500 });
 
@@ -129,7 +151,7 @@ describe("HistoryView", () => {
     });
 
     mockFetch.mockClear();
-    await user.click(screen.getByText("5d"));
+    await user.click(screen.getByText("This Week"));
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalled();
@@ -142,9 +164,10 @@ describe("HistoryView", () => {
   it("renders TimeRangeSelector with all options", () => {
     mockFetch.mockReturnValue(new Promise(() => {}));
     render(<HistoryView deviceId={456} />);
-    expect(screen.getByText("1h")).toBeInTheDocument();
-    expect(screen.getByText("6h")).toBeInTheDocument();
-    expect(screen.getByText("24h")).toBeInTheDocument();
-    expect(screen.getByText("5d")).toBeInTheDocument();
+    expect(screen.getByText("Today")).toBeInTheDocument();
+    expect(screen.getByText("This Week")).toBeInTheDocument();
+    expect(screen.getByText("Past Month")).toBeInTheDocument();
+    expect(screen.getByText("Last Month")).toBeInTheDocument();
+    expect(screen.getByText("Past Year")).toBeInTheDocument();
   });
 });

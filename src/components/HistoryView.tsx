@@ -1,11 +1,12 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import TimeRangeSelector, { type TimeRange } from "./TimeRangeSelector";
+import TimeRangeSelector from "./TimeRangeSelector";
 import HistoryChart, { type HistoryDataPoint } from "./HistoryChart";
 import RainChart from "./RainChart";
 import { MetricUnitStrategy, type UnitStrategy } from "@/lib/units";
 import { tempDomain, pressureDomain, zeroBasedDomain } from "@/lib/chartDomain";
+import { getTimeRange, chunkTimeRange, type TimeRange } from "@/lib/timeRanges";
 import type { TransformedObservation } from "@/lib/transforms";
 
 interface HistoryViewProps {
@@ -13,22 +14,18 @@ interface HistoryViewProps {
   units?: UnitStrategy;
 }
 
-const RANGE_SECONDS: Record<TimeRange, number> = {
-  "1h": 3600,
-  "6h": 21600,
-  "24h": 86400,
-  "5d": 432000,
-};
-
 function formatTime(epoch: number, range: TimeRange): string {
   const date = new Date(epoch * 1000);
-  if (range === "1h" || range === "6h") {
+  if (range === "today") {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   }
-  if (range === "24h") {
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  if (range === "week" || range === "last-month") {
+    return date.toLocaleDateString([], { month: "short", day: "numeric" });
   }
-  return date.toLocaleDateString([], { month: "short", day: "numeric" });
+  if (range === "month") {
+    return date.toLocaleDateString([], { month: "short", day: "numeric" });
+  }
+  return date.toLocaleDateString([], { month: "short", year: "2-digit" });
 }
 
 function toChartData(
@@ -45,10 +42,24 @@ function toChartData(
     }));
 }
 
+async function fetchChunk(
+  deviceId: number,
+  start: number,
+  end: number,
+  signal: AbortSignal
+): Promise<TransformedObservation[]> {
+  const res = await fetch(
+    `/api/history?device_id=${deviceId}&time_start=${start}&time_end=${end}`,
+    { signal }
+  );
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 const DEFAULT_UNITS = new MetricUnitStrategy();
 
 export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: HistoryViewProps) {
-  const [range, setRange] = useState<TimeRange>("24h");
+  const [range, setRange] = useState<TimeRange>("today");
   const [obs, setObs] = useState<TransformedObservation[]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -56,17 +67,16 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
   const load = useCallback(
     async (id: number, timeRange: TimeRange, signal: AbortSignal) => {
       setPending(true);
-      const now = Math.floor(Date.now() / 1000);
-      const start = now - RANGE_SECONDS[timeRange];
       try {
-        const res = await fetch(
-          `/api/history?device_id=${id}&time_start=${start}&time_end=${now}`,
-          { signal }
+        const [start, end] = getTimeRange(timeRange);
+        const chunks = chunkTimeRange(start, end);
+
+        const results = await Promise.all(
+          chunks.map(([s, e]) => fetchChunk(id, s, e, signal))
         );
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: TransformedObservation[] = await res.json();
+
         if (!signal.aborted) {
-          setObs(data);
+          setObs(results.flat());
           setError(null);
         }
       } catch (err) {
