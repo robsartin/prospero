@@ -32,7 +32,7 @@ export default function RainChart({ data, unit, precision = 2 }: RainChartProps)
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="time" tick={{ fontSize: 12 }} />
           <YAxis tick={{ fontSize: 12 }} tickFormatter={fmt} />
-          <Tooltip formatter={(v: number) => [fmt(v), "Rain"]} />
+          <Tooltip formatter={(v) => [fmt(Number(v)), "Rain"]} />
           <Area
             type="monotone"
             dataKey="value"

@@ -46,7 +46,7 @@ export default function HistoryChart({
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="time" tick={{ fontSize: 12 }} />
           <YAxis tick={{ fontSize: 12 }} tickFormatter={fmt} />
-          <Tooltip formatter={(v: number) => [fmt(v), label]} />
+          <Tooltip formatter={(v) => [fmt(Number(v)), label]} />
           <Line
             type="monotone"
             dataKey="value"
