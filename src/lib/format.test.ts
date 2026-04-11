@@ -1,4 +1,4 @@
-import { formatValue, type MetricKind } from "./format";
+import { formatValue } from "./format";
 
 describe("formatValue", () => {
   describe("temperature (1 decimal)", () => {
