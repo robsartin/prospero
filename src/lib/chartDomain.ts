@@ -14,10 +14,8 @@ export function tempDomain(data: HistoryDataPoint[]): [number, number] {
   return [floorTo(Math.min(...values), 5) - 5, ceilTo(Math.max(...values), 5) + 5];
 }
 
-export function pressureDomain(data: HistoryDataPoint[]): [number, number] {
-  if (data.length === 0) return [980, 1040];
-  const values = data.map((d) => d.value);
-  return [floorTo(Math.min(...values), 5) - 5, ceilTo(Math.max(...values), 5) + 5];
+export function pressureDomain(): [number, number] {
+  return [28, 31];
 }
 
 export function zeroBasedDomain(data: HistoryDataPoint[]): [number, number] {

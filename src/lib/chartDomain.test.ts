@@ -17,13 +17,13 @@ describe("tempDomain", () => {
 });
 
 describe("pressureDomain", () => {
-  it("rounds to nearest 5 with padding around data range", () => {
-    const data = [{ time: "", value: 1008 }, { time: "", value: 1022 }];
-    expect(pressureDomain(data)).toEqual([1000, 1030]);
+  it("returns 28-31 fixed range", () => {
+    const data = [{ time: "", value: 29.5 }, { time: "", value: 30.1 }];
+    expect(pressureDomain(data)).toEqual([28, 31]);
   });
 
-  it("returns defaults for empty data", () => {
-    expect(pressureDomain([])).toEqual([980, 1040]);
+  it("returns 28-31 for empty data", () => {
+    expect(pressureDomain([])).toEqual([28, 31]);
   });
 });
 
