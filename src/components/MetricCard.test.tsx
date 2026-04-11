@@ -46,4 +46,18 @@ describe("MetricCard", () => {
     render(<MetricCard label="Conditions" value="Sunny" unit="" />);
     expect(screen.getByText("Sunny")).toBeInTheDocument();
   });
+
+  it("applies severity border color when provided", () => {
+    const { container } = render(
+      <MetricCard label="Temp" value={40} unit="°C" severityColor="border-red-500" />
+    );
+    expect(container.firstChild).toHaveClass("border-red-500");
+  });
+
+  it("uses default border when no severity", () => {
+    const { container } = render(
+      <MetricCard label="Temp" value={20} unit="°C" />
+    );
+    expect(container.firstChild).toHaveClass("border-gray-200");
+  });
 });
