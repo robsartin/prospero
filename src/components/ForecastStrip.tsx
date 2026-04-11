@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ForecastDay } from "./ForecastDay";
 import type { ForecastResponse } from "@/lib/types";
 
@@ -10,32 +10,51 @@ interface ForecastStripProps {
   stationId: number | null;
 }
 
+async function fetchForecastData(
+  stationId: number,
+  signal: AbortSignal
+): Promise<ForecastResponse> {
+  const res = await fetch(`/api/forecast?station_id=${stationId}`, { signal });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
 export default function ForecastStrip({ stationId }: ForecastStripProps) {
   const [data, setData] = useState<ForecastResponse | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async (id: number, signal: AbortSignal) => {
+    setPending(true);
+    try {
+      const json = await fetchForecastData(id, signal);
+      if (!signal.aborted) {
+        setData(json);
+        setError(null);
+      }
+    } catch (err) {
+      if (!signal.aborted && err instanceof Error && err.name !== "AbortError") {
+        setError(err.message);
+      }
+    } finally {
+      if (!signal.aborted) {
+        setPending(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (!stationId) return;
-
-    setLoading(true);
-    setError(null);
-
-    fetch(`/api/forecast?station_id=${stationId}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
-      })
-      .then((json) => setData(json))
-      .catch((err) => setError(err.message))
-      .finally(() => setLoading(false));
-  }, [stationId]);
+    const controller = new AbortController();
+    load(stationId, controller.signal);
+    return () => controller.abort();
+  }, [stationId, load]);
 
   if (!stationId) {
     return <p className="text-zinc-500">Select a station to view forecast.</p>;
   }
 
-  if (loading) {
+  if (pending) {
     return <p data-testid="loading">Loading forecast...</p>;
   }
 
