@@ -71,7 +71,7 @@ describe("CurrentConditions", () => {
     expect(screen.getByText("1013")).toBeInTheDocument();
   });
 
-  it("shows error state on fetch failure", async () => {
+  it("shows error with weather image and retry on fetch failure", async () => {
     mockFetch.mockResolvedValue({
       ok: false,
       status: 500,
@@ -80,10 +80,11 @@ describe("CurrentConditions", () => {
     render(<CurrentConditions stationId={123} />);
 
     await waitFor(() => {
-      expect(screen.getByTestId("error")).toBeInTheDocument();
+      expect(screen.getByRole("img")).toBeInTheDocument();
     });
 
-    expect(screen.getByText("Error: HTTP 500")).toBeInTheDocument();
+    expect(screen.getByText(/rough weather/i)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /try again/i })).toBeInTheDocument();
   });
 
   it("fetches from correct API endpoint", async () => {
