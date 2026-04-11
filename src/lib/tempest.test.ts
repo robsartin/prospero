@@ -3,6 +3,7 @@ import {
   fetchStations,
   fetchObservations,
   fetchForecast,
+  fetchObservationHistory,
 } from "./tempest";
 
 describe("buildUrl", () => {
@@ -99,5 +100,32 @@ describe("fetchForecast", () => {
       "https://swd.weatherflow.com/swd/rest/forecast/station/789?token=test-token"
     );
     expect(result.forecast.daily[0].air_temp_high).toBe(30);
+  });
+});
+
+describe("fetchObservationHistory", () => {
+  it("fetches historical observations with time range", async () => {
+    const mockResponse = {
+      station_id: 123,
+      obs: [{ air_temperature: 20 }],
+      status: { status_code: 0, status_message: "SUCCESS" },
+    };
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockResponse),
+    } as Response);
+
+    const result = await fetchObservationHistory(123, "test-token", 1000, 2000);
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("observations/station/123")
+    );
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("time_start=1000")
+    );
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("time_end=2000")
+    );
+    expect(result.station_id).toBe(123);
   });
 });

@@ -44,3 +44,15 @@ export function fetchForecast(
     token
   );
 }
+
+export function fetchObservationHistory(
+  stationId: number,
+  token: string,
+  timeStart: number,
+  timeEnd: number
+): Promise<ObservationsResponse> {
+  return fetchTempest<ObservationsResponse>(
+    `/observations/station/${stationId}?time_start=${timeStart}&time_end=${timeEnd}`,
+    token
+  );
+}

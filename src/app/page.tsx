@@ -6,6 +6,7 @@ import NavTabs from "@/components/NavTabs";
 import StationPicker from "@/components/StationPicker";
 import CurrentConditions from "@/components/CurrentConditions";
 import ForecastStrip from "@/components/ForecastStrip";
+import HistoryView from "@/components/HistoryView";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("Current");
@@ -28,7 +29,7 @@ export default function Home() {
           <ForecastStrip stationId={stationId} />
         )}
         {activeTab === "History" && (
-          <p className="text-zinc-500">History coming soon.</p>
+          <HistoryView stationId={stationId} />
         )}
       </main>
     </div>
