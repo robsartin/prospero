@@ -16,7 +16,10 @@ async function fetchForecastData(
   signal: AbortSignal
 ): Promise<ForecastResponse> {
   const res = await fetch(`/api/forecast?station_id=${stationId}`, { signal });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${res.status}`);
+  }
   return res.json();
 }
 

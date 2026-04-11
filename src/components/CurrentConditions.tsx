@@ -14,7 +14,10 @@ async function fetchConditions(
   signal: AbortSignal
 ): Promise<ObservationsResponse> {
   const res = await fetch(`/api/observations?station_id=${stationId}`, { signal });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error || `HTTP ${res.status}`);
+  }
   return res.json();
 }
 
