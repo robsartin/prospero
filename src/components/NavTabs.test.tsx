@@ -22,21 +22,22 @@ describe("NavTabs", () => {
   it("calls onTabChange when a tab is clicked", async () => {
     const user = userEvent.setup();
     render(<NavTabs {...defaultProps} />);
+
     await user.click(screen.getByText("Forecast"));
     expect(defaultProps.onTabChange).toHaveBeenCalledWith("Forecast");
+
+    await user.click(screen.getByText("History"));
+    expect(defaultProps.onTabChange).toHaveBeenCalledWith("History");
   });
 
-  it("highlights the active tab", () => {
-    render(<NavTabs {...defaultProps} activeTab="History" />);
-    const historyButton = screen.getByText("History");
-    expect(historyButton).toHaveClass("border-blue-500");
-    expect(historyButton).toHaveClass("text-blue-600");
-  });
+  it("highlights the active tab with different styling", () => {
+    render(<NavTabs {...defaultProps} activeTab="Forecast" />);
 
-  it("does not highlight inactive tabs", () => {
-    render(<NavTabs {...defaultProps} activeTab="Current" />);
-    const forecastButton = screen.getByText("Forecast");
-    expect(forecastButton).not.toHaveClass("border-blue-500");
-    expect(forecastButton).toHaveClass("text-zinc-500");
+    const forecastTab = screen.getByText("Forecast");
+    const currentTab = screen.getByText("Current");
+
+    expect(forecastTab.className).not.toEqual(currentTab.className);
+    expect(forecastTab).toHaveAttribute("aria-selected", "true");
+    expect(currentTab).toHaveAttribute("aria-selected", "false");
   });
 });
