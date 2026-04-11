@@ -4,10 +4,12 @@ import { useCallback, useEffect, useState } from "react";
 import TimeRangeSelector, { type TimeRange } from "./TimeRangeSelector";
 import HistoryChart, { type HistoryDataPoint } from "./HistoryChart";
 import RainChart from "./RainChart";
-import type { ObservationsResponse, StationObservation } from "@/lib/types";
+import { MetricUnitStrategy, type UnitStrategy } from "@/lib/units";
+import type { TransformedObservation } from "@/lib/transforms";
 
 interface HistoryViewProps {
-  stationId: number | null;
+  deviceId: number | null;
+  units?: UnitStrategy;
 }
 
 const RANGE_SECONDS: Record<TimeRange, number> = {
@@ -29,21 +31,24 @@ function formatTime(epoch: number, range: TimeRange): string {
 }
 
 function toChartData(
-  obs: StationObservation[],
-  field: keyof StationObservation,
-  range: TimeRange
+  obs: TransformedObservation[],
+  field: keyof TransformedObservation,
+  range: TimeRange,
+  convert: (v: number) => number = (v) => v
 ): HistoryDataPoint[] {
   return obs
     .filter((o) => o[field] != null)
     .map((o) => ({
       time: formatTime(o.timestamp, range),
-      value: o[field] as number,
+      value: convert(o[field] as number),
     }));
 }
 
-export default function HistoryView({ stationId }: HistoryViewProps) {
+const DEFAULT_UNITS = new MetricUnitStrategy();
+
+export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: HistoryViewProps) {
   const [range, setRange] = useState<TimeRange>("24h");
-  const [obs, setObs] = useState<StationObservation[]>([]);
+  const [obs, setObs] = useState<TransformedObservation[]>([]);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,13 +59,13 @@ export default function HistoryView({ stationId }: HistoryViewProps) {
       const start = now - RANGE_SECONDS[timeRange];
       try {
         const res = await fetch(
-          `/api/history?station_id=${id}&time_start=${start}&time_end=${now}`,
+          `/api/history?device_id=${id}&time_start=${start}&time_end=${now}`,
           { signal }
         );
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const data: ObservationsResponse = await res.json();
+        const data: TransformedObservation[] = await res.json();
         if (!signal.aborted) {
-          setObs(data.obs ?? []);
+          setObs(data);
           setError(null);
         }
       } catch (err) {
@@ -77,13 +82,13 @@ export default function HistoryView({ stationId }: HistoryViewProps) {
   );
 
   useEffect(() => {
-    if (!stationId) return;
+    if (!deviceId) return;
     const controller = new AbortController();
-    load(stationId, range, controller.signal);
+    load(deviceId, range, controller.signal);
     return () => controller.abort();
-  }, [stationId, range, load]);
+  }, [deviceId, range, load]);
 
-  if (!stationId) {
+  if (!deviceId) {
     return <p className="text-zinc-500">Select a station to view history.</p>;
   }
 
@@ -97,36 +102,36 @@ export default function HistoryView({ stationId }: HistoryViewProps) {
       {!pending && !error && (
         <div className="space-y-8">
           <HistoryChart
-            data={toChartData(obs, "air_temperature", range)}
+            data={toChartData(obs, "airTemperature", range, units.temp)}
             label="Temperature"
-            unit="°C"
+            unit={units.labels.temp}
             color="#ef4444"
             precision={1}
           />
           <HistoryChart
-            data={toChartData(obs, "sea_level_pressure", range)}
+            data={toChartData(obs, "stationPressure", range, units.pressure)}
             label="Pressure"
-            unit="mb"
+            unit={units.labels.pressure}
             color="#3b82f6"
             precision={1}
           />
           <HistoryChart
-            data={toChartData(obs, "wind_avg", range)}
+            data={toChartData(obs, "windAvg", range, units.wind)}
             label="Wind"
-            unit="m/s"
+            unit={units.labels.wind}
             color="#10b981"
             precision={1}
           />
           <HistoryChart
-            data={toChartData(obs, "relative_humidity", range)}
+            data={toChartData(obs, "relativeHumidity", range)}
             label="Humidity"
             unit="%"
             color="#8b5cf6"
             precision={0}
           />
           <RainChart
-            data={toChartData(obs, "precip", range)}
-            unit="mm"
+            data={toChartData(obs, "rainAccumulated", range, units.rain)}
+            unit={units.labels.rain}
             precision={2}
           />
         </div>

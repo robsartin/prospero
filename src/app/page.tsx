@@ -1,16 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Header from "@/components/Header";
 import NavTabs from "@/components/NavTabs";
 import StationPicker from "@/components/StationPicker";
 import CurrentConditions from "@/components/CurrentConditions";
 import ForecastStrip from "@/components/ForecastStrip";
 import HistoryView from "@/components/HistoryView";
+import type { Station } from "@/lib/types";
+
+function findTempestDeviceId(station: Station): number | null {
+  const stDevice = station.devices?.find((d) => d.device_type === "ST");
+  return stDevice?.device_id ?? null;
+}
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("Current");
   const [stationId, setStationId] = useState<number | null>(null);
+  const [deviceId, setDeviceId] = useState<number | null>(null);
+
+  const handleStationSelect = useCallback((station: Station) => {
+    setDeviceId(findTempestDeviceId(station));
+  }, []);
 
   return (
     <div className="flex flex-col flex-1 min-h-screen bg-zinc-50 font-sans dark:bg-black">
@@ -18,6 +29,7 @@ export default function Home() {
         <StationPicker
           selectedStationId={stationId}
           onStationChange={setStationId}
+          onStationSelect={handleStationSelect}
         />
       </Header>
       <NavTabs activeTab={activeTab} onTabChange={setActiveTab} />
@@ -29,7 +41,7 @@ export default function Home() {
           <ForecastStrip stationId={stationId} />
         )}
         {activeTab === "History" && (
-          <HistoryView stationId={stationId} />
+          <HistoryView deviceId={deviceId} />
         )}
       </main>
     </div>

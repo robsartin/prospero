@@ -1,6 +1,7 @@
 import type {
   StationsResponse,
   ObservationsResponse,
+  DeviceObservationsResponse,
   ForecastResponse,
 } from "./types";
 
@@ -42,14 +43,14 @@ export function fetchForecast(
   return fetchUrl<ForecastResponse>(url);
 }
 
-export function fetchObservationHistory(
-  stationId: number,
+export function fetchDeviceHistory(
+  deviceId: number,
   token: string,
   timeStart: number,
   timeEnd: number
-): Promise<ObservationsResponse> {
-  const url = buildUrl(`/observations/station/${stationId}`, token);
+): Promise<DeviceObservationsResponse> {
+  const url = buildUrl(`/observations/device/${deviceId}`, token);
   url.searchParams.set("time_start", String(timeStart));
   url.searchParams.set("time_end", String(timeEnd));
-  return fetchUrl<ObservationsResponse>(url);
+  return fetchUrl<DeviceObservationsResponse>(url);
 }

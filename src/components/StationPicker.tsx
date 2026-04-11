@@ -5,6 +5,7 @@ import type { Station, StationsResponse } from "@/lib/types";
 
 interface StationPickerProps {
   onStationChange: (stationId: number) => void;
+  onStationSelect?: (station: Station) => void;
   selectedStationId: number | null;
 }
 
@@ -17,6 +18,7 @@ async function fetchStationList(signal: AbortSignal): Promise<Station[]> {
 
 export default function StationPicker({
   onStationChange,
+  onStationSelect,
   selectedStationId,
 }: StationPickerProps) {
   const [stations, setStations] = useState<Station[]>([]);
@@ -32,6 +34,7 @@ export default function StationPicker({
         setError(null);
         if (!selectedStationId && result.length > 0) {
           onStationChange(result[0].station_id);
+          onStationSelect?.(result[0]);
         }
       }
     } catch (err) {
@@ -63,7 +66,12 @@ export default function StationPicker({
     <select
       aria-label="Select station"
       value={selectedStationId ?? ""}
-      onChange={(e) => onStationChange(Number(e.target.value))}
+      onChange={(e) => {
+        const id = Number(e.target.value);
+        onStationChange(id);
+        const station = stations.find((s) => s.station_id === id);
+        if (station) onStationSelect?.(station);
+      }}
       className="rounded border border-zinc-600 bg-zinc-800 px-2 py-1 text-sm text-white"
     >
       <option value="" disabled>

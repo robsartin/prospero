@@ -1,8 +1,8 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import HistoryView from "./HistoryView";
+import { ImperialUnitStrategy } from "@/lib/units";
 
-// Mock Recharts
 jest.mock("recharts", () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   LineChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -18,42 +18,39 @@ jest.mock("recharts", () => ({
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
-const mockHistory = {
-  station_id: 123,
-  obs: [
-    {
-      timestamp: 1681000000,
-      air_temperature: 22,
-      sea_level_pressure: 1013,
-      wind_avg: 3.5,
-      relative_humidity: 65,
-      precip: 0.2,
-    },
-    {
-      timestamp: 1681003600,
-      air_temperature: 23,
-      sea_level_pressure: 1014,
-      wind_avg: 4.0,
-      relative_humidity: 60,
-      precip: 0.0,
-    },
-  ],
-  status: { status_code: 0, status_message: "SUCCESS" },
-};
+// API now returns TransformedObservation[] (camelCase, from transforms.ts)
+const mockHistory = [
+  {
+    timestamp: 1681000000,
+    airTemperature: 22,
+    stationPressure: 1013,
+    windAvg: 3.5,
+    relativeHumidity: 65,
+    rainAccumulated: 0.2,
+  },
+  {
+    timestamp: 1681003600,
+    airTemperature: 23,
+    stationPressure: 1014,
+    windAvg: 4.0,
+    relativeHumidity: 60,
+    rainAccumulated: 0.0,
+  },
+];
 
 describe("HistoryView", () => {
   beforeEach(() => {
     mockFetch.mockReset();
   });
 
-  it("shows prompt when no stationId", () => {
-    render(<HistoryView stationId={null} />);
+  it("shows prompt when no deviceId", () => {
+    render(<HistoryView deviceId={null} />);
     expect(screen.getByText("Select a station to view history.")).toBeInTheDocument();
   });
 
   it("shows loading state", () => {
     mockFetch.mockReturnValue(new Promise(() => {}));
-    render(<HistoryView stationId={123} />);
+    render(<HistoryView deviceId={456} />);
     expect(screen.getByTestId("loading")).toBeInTheDocument();
   });
 
@@ -63,7 +60,7 @@ describe("HistoryView", () => {
       json: () => Promise.resolve(mockHistory),
     });
 
-    render(<HistoryView stationId={123} />);
+    render(<HistoryView deviceId={456} />);
 
     await waitFor(() => {
       expect(screen.getByText("Temperature (°C)")).toBeInTheDocument();
@@ -75,10 +72,43 @@ describe("HistoryView", () => {
     expect(screen.getByText("Rain (mm)")).toBeInTheDocument();
   });
 
+  it("uses imperial labels when units provided", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockHistory),
+    });
+
+    render(<HistoryView deviceId={456} units={new ImperialUnitStrategy()} />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Temperature (°F)")).toBeInTheDocument();
+    });
+
+    expect(screen.getByText("Pressure (inHg)")).toBeInTheDocument();
+    expect(screen.getByText("Wind (mph)")).toBeInTheDocument();
+    expect(screen.getByText("Rain (in)")).toBeInTheDocument();
+  });
+
+  it("fetches from /api/history with device_id", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve(mockHistory),
+    });
+
+    render(<HistoryView deviceId={456} />);
+
+    await waitFor(() => {
+      expect(mockFetch).toHaveBeenCalled();
+    });
+
+    const url = mockFetch.mock.calls[0][0] as string;
+    expect(url).toContain("device_id=456");
+  });
+
   it("shows error on fetch failure", async () => {
     mockFetch.mockResolvedValue({ ok: false, status: 500 });
 
-    render(<HistoryView stationId={123} />);
+    render(<HistoryView deviceId={456} />);
 
     await waitFor(() => {
       expect(screen.getByTestId("error")).toBeInTheDocument();
@@ -92,7 +122,7 @@ describe("HistoryView", () => {
       json: () => Promise.resolve(mockHistory),
     });
 
-    render(<HistoryView stationId={123} />);
+    render(<HistoryView deviceId={456} />);
 
     await waitFor(() => {
       expect(screen.getByText("Temperature (°C)")).toBeInTheDocument();
@@ -106,12 +136,12 @@ describe("HistoryView", () => {
     });
 
     const url = mockFetch.mock.calls[0][0] as string;
-    expect(url).toContain("station_id=123");
+    expect(url).toContain("device_id=456");
   });
 
   it("renders TimeRangeSelector with all options", () => {
     mockFetch.mockReturnValue(new Promise(() => {}));
-    render(<HistoryView stationId={123} />);
+    render(<HistoryView deviceId={456} />);
     expect(screen.getByText("24h")).toBeInTheDocument();
     expect(screen.getByText("7d")).toBeInTheDocument();
     expect(screen.getByText("30d")).toBeInTheDocument();
