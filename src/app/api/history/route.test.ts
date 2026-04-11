@@ -8,9 +8,9 @@ jest.mock("@/lib/config", () => ({
   getConfig: () => ({ token: "test-token" }),
 }));
 
-const mockFetchHistory = jest.fn();
+const mockFetchDeviceHistory = jest.fn();
 jest.mock("@/lib/tempest", () => ({
-  fetchObservationHistory: (...args: unknown[]) => mockFetchHistory(...args),
+  fetchDeviceHistory: (...args: unknown[]) => mockFetchDeviceHistory(...args),
 }));
 
 function createRequest(url: string) {
@@ -19,29 +19,32 @@ function createRequest(url: string) {
 
 describe("GET /api/history", () => {
   beforeEach(() => {
-    mockFetchHistory.mockReset();
+    mockFetchDeviceHistory.mockReset();
   });
 
-  it("returns history for valid params", async () => {
+  it("returns transformed history for valid params", async () => {
     const mockData = {
-      station_id: 123,
-      obs: [{ air_temperature: 20 }],
+      device_id: 456,
+      type: "obs_st",
+      obs: [[1681000000, 0.5, 1.2, 2.3, 180, 3, 1013, 22.5, 65, 50000, 6, 845, 0, 0, 15, 2, 2.6, 1]],
       status: { status_code: 0, status_message: "SUCCESS" },
     };
-    mockFetchHistory.mockResolvedValue(mockData);
+    mockFetchDeviceHistory.mockResolvedValue(mockData);
 
     const response = await GET(
-      createRequest("/api/history?station_id=123&time_start=1000&time_end=2000")
+      createRequest("/api/history?device_id=456&time_start=1000&time_end=2000")
     );
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(body.station_id).toBe(123);
-    expect(mockFetchHistory).toHaveBeenCalledWith(123, "test-token", 1000, 2000);
+    expect(mockFetchDeviceHistory).toHaveBeenCalledWith(456, "test-token", 1000, 2000);
+    // Should return transformed observations, not raw arrays
+    expect(body[0].airTemperature).toBe(22.5);
+    expect(body[0].timestamp).toBe(1681000000);
   });
 
   it("returns 400 when params are missing", async () => {
-    const response = await GET(createRequest("/api/history?station_id=123"));
+    const response = await GET(createRequest("/api/history?device_id=456"));
     const body = await response.json();
 
     expect(response.status).toBe(400);
@@ -49,10 +52,10 @@ describe("GET /api/history", () => {
   });
 
   it("returns 500 on API error", async () => {
-    mockFetchHistory.mockRejectedValue(new Error("API down"));
+    mockFetchDeviceHistory.mockRejectedValue(new Error("API down"));
 
     const response = await GET(
-      createRequest("/api/history?station_id=123&time_start=1000&time_end=2000")
+      createRequest("/api/history?device_id=456&time_start=1000&time_end=2000")
     );
     const body = await response.json();
 
