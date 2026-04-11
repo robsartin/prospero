@@ -60,6 +60,10 @@ describe("fetchStations", () => {
 });
 
 describe("fetchObservations", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
   it("fetches observations for a station", async () => {
     const mockResponse = {
       station_id: 456,
@@ -81,6 +85,10 @@ describe("fetchObservations", () => {
 });
 
 describe("fetchForecast", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
   it("fetches forecast for a station", async () => {
     const mockResponse = {
       forecast: {
@@ -96,9 +104,11 @@ describe("fetchForecast", () => {
 
     const result = await fetchForecast(789, "test-token");
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      "https://swd.weatherflow.com/swd/rest/forecast/station/789?token=test-token"
-    );
+    const calledUrl = mockFetch.mock.calls[0][0] as string;
+    const url = new URL(calledUrl);
+    expect(url.pathname).toBe("/swd/rest/better_forecast");
+    expect(url.searchParams.get("station_id")).toBe("789");
+    expect(url.searchParams.get("token")).toBe("test-token");
     expect(result.forecast.daily[0].air_temp_high).toBe(30);
   });
 });

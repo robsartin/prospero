@@ -42,10 +42,10 @@ export function fetchForecast(
   stationId: number,
   token: string
 ): Promise<ForecastResponse> {
-  return fetchTempest<ForecastResponse>(
-    `/forecast/station/${stationId}`,
-    token
-  );
+  const url = buildUrl("/better_forecast", token);
+  const parsed = new URL(url);
+  parsed.searchParams.set("station_id", String(stationId));
+  return fetchUrl<ForecastResponse>(parsed.toString());
 }
 
 export function fetchObservationHistory(
