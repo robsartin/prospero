@@ -6,7 +6,9 @@ import HistoryView from "./HistoryView";
 jest.mock("recharts", () => ({
   ResponsiveContainer: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   LineChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  AreaChart: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
   Line: () => <div />,
+  Area: () => <div />,
   XAxis: () => <div />,
   YAxis: () => <div />,
   Tooltip: () => <div />,
@@ -24,12 +26,16 @@ const mockHistory = {
       air_temperature: 22,
       sea_level_pressure: 1013,
       wind_avg: 3.5,
+      relative_humidity: 65,
+      precip: 0.2,
     },
     {
       timestamp: 1681003600,
       air_temperature: 23,
       sea_level_pressure: 1014,
       wind_avg: 4.0,
+      relative_humidity: 60,
+      precip: 0.0,
     },
   ],
   status: { status_code: 0, status_message: "SUCCESS" },
@@ -65,6 +71,8 @@ describe("HistoryView", () => {
 
     expect(screen.getByText("Pressure (mb)")).toBeInTheDocument();
     expect(screen.getByText("Wind (m/s)")).toBeInTheDocument();
+    expect(screen.getByText("Humidity (%)")).toBeInTheDocument();
+    expect(screen.getByText("Rain (mm)")).toBeInTheDocument();
   });
 
   it("shows error on fetch failure", async () => {
