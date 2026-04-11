@@ -71,11 +71,15 @@ describe("ImperialUnitStrategy", () => {
 });
 
 describe("getUnitStrategy", () => {
-  it("returns MetricUnitStrategy for 'metric'", () => {
-    expect(getUnitStrategy("metric")).toBeInstanceOf(MetricUnitStrategy);
+  it("returns a strategy with id 'metric' for 'metric'", () => {
+    const strategy = getUnitStrategy("metric");
+    expect(strategy.id).toBe("metric");
+    expect(strategy.temp(100)).toBe(100);
   });
 
-  it("returns ImperialUnitStrategy for 'imperial'", () => {
-    expect(getUnitStrategy("imperial")).toBeInstanceOf(ImperialUnitStrategy);
+  it("returns a strategy with id 'imperial' for 'imperial'", () => {
+    const strategy = getUnitStrategy("imperial");
+    expect(strategy.id).toBe("imperial");
+    expect(strategy.temp(100)).toBeCloseTo(212);
   });
 });

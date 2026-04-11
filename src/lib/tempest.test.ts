@@ -9,25 +9,31 @@ import {
 describe("buildUrl", () => {
   it("constructs a Tempest API URL with token", () => {
     const url = buildUrl("/stations", "test-token");
-    expect(url).toBe(
+    expect(url.toString()).toBe(
       "https://swd.weatherflow.com/swd/rest/stations?token=test-token"
     );
   });
 
+  it("returns a URL object for further manipulation", () => {
+    const url = buildUrl("/stations", "test-token");
+    expect(url).toBeInstanceOf(URL);
+    expect(url.searchParams.get("token")).toBe("test-token");
+  });
+
   it("encodes special characters in the token", () => {
     const url = buildUrl("/stations", "token with spaces");
-    expect(url).toContain("token=token+with+spaces");
+    expect(url.toString()).toContain("token=token+with+spaces");
   });
 });
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
 
-describe("fetchStations", () => {
-  beforeEach(() => {
-    mockFetch.mockReset();
-  });
+beforeEach(() => {
+  mockFetch.mockReset();
+});
 
+describe("fetchStations", () => {
   it("fetches stations and returns typed response", async () => {
     const mockResponse = {
       stations: [{ station_id: 123, name: "My Station" }],
@@ -60,10 +66,6 @@ describe("fetchStations", () => {
 });
 
 describe("fetchObservations", () => {
-  beforeEach(() => {
-    mockFetch.mockReset();
-  });
-
   it("fetches observations for a station", async () => {
     const mockResponse = {
       station_id: 456,
@@ -85,10 +87,6 @@ describe("fetchObservations", () => {
 });
 
 describe("fetchForecast", () => {
-  beforeEach(() => {
-    mockFetch.mockReset();
-  });
-
   it("fetches forecast for a station", async () => {
     const mockResponse = {
       forecast: {
@@ -104,21 +102,16 @@ describe("fetchForecast", () => {
 
     const result = await fetchForecast(789, "test-token");
 
-    const calledUrl = mockFetch.mock.calls[0][0] as string;
-    const url = new URL(calledUrl);
-    expect(url.pathname).toBe("/swd/rest/better_forecast");
-    expect(url.searchParams.get("station_id")).toBe("789");
-    expect(url.searchParams.get("token")).toBe("test-token");
+    const calledUrl = new URL(mockFetch.mock.calls[0][0] as string);
+    expect(calledUrl.pathname).toBe("/swd/rest/better_forecast");
+    expect(calledUrl.searchParams.get("station_id")).toBe("789");
+    expect(calledUrl.searchParams.get("token")).toBe("test-token");
     expect(result.forecast.daily[0].air_temp_high).toBe(30);
   });
 });
 
 describe("fetchObservationHistory", () => {
-  beforeEach(() => {
-    mockFetch.mockReset();
-  });
-
-  it("fetches historical observations with time range", async () => {
+  it("fetches historical observations with correct URL params", async () => {
     const mockResponse = {
       station_id: 123,
       obs: [{ air_temperature: 20 }],
@@ -131,26 +124,11 @@ describe("fetchObservationHistory", () => {
 
     const result = await fetchObservationHistory(123, "test-token", 1000, 2000);
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining("observations/station/123")
-    );
+    const calledUrl = new URL(mockFetch.mock.calls[0][0] as string);
+    expect(calledUrl.pathname).toBe("/swd/rest/observations/station/123");
+    expect(calledUrl.searchParams.get("token")).toBe("test-token");
+    expect(calledUrl.searchParams.get("time_start")).toBe("1000");
+    expect(calledUrl.searchParams.get("time_end")).toBe("2000");
     expect(result.station_id).toBe(123);
-  });
-
-  it("constructs a valid URL with all params as query strings", async () => {
-    mockFetch.mockResolvedValue({
-      ok: true,
-      json: () => Promise.resolve({ obs: [] }),
-    } as Response);
-
-    await fetchObservationHistory(123, "tok", 1000, 2000);
-
-    const calledUrl = mockFetch.mock.calls[0][0] as string;
-    const url = new URL(calledUrl);
-    expect(url.searchParams.get("token")).toBe("tok");
-    expect(url.searchParams.get("time_start")).toBe("1000");
-    expect(url.searchParams.get("time_end")).toBe("2000");
-    // no double ? in URL
-    expect(calledUrl.split("?").length).toBe(2);
   });
 });
