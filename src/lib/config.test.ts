@@ -19,4 +19,21 @@ describe("getConfig", () => {
 
     expect(config).toEqual({ token: "test-token", stationId: "12345" });
   });
+
+  it("throws when TEMPEST_API_TOKEN is missing", () => {
+    delete process.env.TEMPEST_API_TOKEN;
+
+    expect(() => getConfig()).toThrow(
+      "TEMPEST_API_TOKEN environment variable is required"
+    );
+  });
+
+  it("returns undefined stationId when TEMPEST_STATION_ID is not set", () => {
+    process.env.TEMPEST_API_TOKEN = "test-token";
+    delete process.env.TEMPEST_STATION_ID;
+
+    const config = getConfig();
+
+    expect(config).toEqual({ token: "test-token", stationId: undefined });
+  });
 });
