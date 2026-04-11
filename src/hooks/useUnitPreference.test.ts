@@ -1,5 +1,6 @@
 import { renderHook, act } from "@testing-library/react";
 import { useUnitPreference } from "./useUnitPreference";
+import { getUnitStrategy } from "@/lib/units";
 
 const mockStorage: Record<string, string> = {};
 
@@ -32,14 +33,6 @@ describe("useUnitPreference", () => {
   it("updates units and persists to localStorage", () => {
     const { result } = renderHook(() => useUnitPreference());
 
-    act(() => {
-      result.current.setUnits(
-        expect.objectContaining ? result.current.units : result.current.units
-      );
-    });
-
-    // Use the actual getUnitStrategy to get the metric strategy
-    const { getUnitStrategy } = require("@/lib/units");
     act(() => {
       result.current.setUnits(getUnitStrategy("metric"));
     });

@@ -1,6 +1,6 @@
 import { render, screen, waitFor, act } from "@testing-library/react";
 import CurrentConditions from "./CurrentConditions";
-import { ImperialUnitStrategy, MetricUnitStrategy } from "@/lib/units";
+import { ImperialUnitStrategy } from "@/lib/units";
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch;
