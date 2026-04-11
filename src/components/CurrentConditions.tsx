@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { MetricCard } from "./MetricCard";
 import ErrorDisplay from "./ErrorDisplay";
+import { formatValue } from "@/lib/format";
 import type { ObservationsResponse } from "@/lib/types";
 
 interface CurrentConditionsProps {
@@ -100,52 +101,52 @@ export default function CurrentConditions({ stationId }: CurrentConditionsProps)
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
       <MetricCard
         label="Temperature"
-        value={obs.air_temperature ?? "--"}
+        value={formatValue("temperature", obs.air_temperature)}
         unit="°C"
-        secondary={obs.feels_like != null ? `Feels ${obs.feels_like}°` : undefined}
+        secondary={obs.feels_like != null ? `Feels ${formatValue("feels_like", obs.feels_like)}°` : undefined}
       />
       <MetricCard
         label="Wind"
-        value={obs.wind_avg ?? "--"}
+        value={formatValue("wind", obs.wind_avg)}
         unit="m/s"
-        secondary={obs.wind_gust != null ? `Gust ${obs.wind_gust}` : undefined}
+        secondary={obs.wind_gust != null ? `Gust ${formatValue("wind", obs.wind_gust)}` : undefined}
       />
       <MetricCard
         label="Humidity"
-        value={obs.relative_humidity ?? "--"}
+        value={formatValue("humidity", obs.relative_humidity)}
         unit="%"
-        secondary={obs.dew_point != null ? `Dew ${obs.dew_point}°` : undefined}
+        secondary={obs.dew_point != null ? `Dew ${formatValue("dew_point", obs.dew_point)}°` : undefined}
       />
       <MetricCard
         label="Pressure"
-        value={obs.sea_level_pressure ?? "--"}
+        value={formatValue("pressure", obs.sea_level_pressure)}
         unit="mb"
         secondary={obs.pressure_trend ?? undefined}
       />
       <MetricCard
         label="UV Index"
-        value={obs.uv ?? "--"}
+        value={formatValue("uv", obs.uv)}
         unit=""
-        secondary={obs.solar_radiation != null ? `${obs.solar_radiation} W/m²` : undefined}
+        secondary={obs.solar_radiation != null ? `${formatValue("brightness", obs.solar_radiation)} W/m²` : undefined}
       />
       <MetricCard
         label="Rain Today"
-        value={obs.precip_accum_local_day ?? "--"}
+        value={formatValue("rain", obs.precip_accum_local_day)}
         unit="mm"
       />
       <MetricCard
         label="Lightning"
-        value={obs.lightning_strike_count ?? 0}
+        value={formatValue("lightning", obs.lightning_strike_count)}
         unit="strikes"
         secondary={
           obs.lightning_strike_last_distance != null
-            ? `Last ${obs.lightning_strike_last_distance} km`
+            ? `Last ${formatValue("distance", obs.lightning_strike_last_distance)} km`
             : undefined
         }
       />
       <MetricCard
         label="Brightness"
-        value={obs.brightness ?? "--"}
+        value={formatValue("brightness", obs.brightness)}
         unit="lux"
       />
     </div>

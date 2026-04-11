@@ -16,21 +16,21 @@ const mockObservations = {
   station_id: 123,
   obs: [
     {
-      air_temperature: 22.5,
-      feels_like: 24,
-      wind_avg: 3.2,
-      wind_gust: 5.1,
+      air_temperature: 22.567,
+      feels_like: 24.321,
+      wind_avg: 3.267,
+      wind_gust: 5.189,
       wind_direction: 180,
-      relative_humidity: 65,
-      dew_point: 15.5,
-      sea_level_pressure: 1013,
+      relative_humidity: 65.4,
+      dew_point: 15.567,
+      sea_level_pressure: 1013.256,
       pressure_trend: "Rising",
-      uv: 6,
+      uv: 6.789,
       solar_radiation: 845,
-      precip_accum_local_day: 0.5,
+      precip_accum_local_day: 0.567,
       lightning_strike_count: 2,
-      lightning_strike_last_distance: 10,
-      brightness: 50000,
+      lightning_strike_last_distance: 10.8,
+      brightness: 50123.7,
     },
   ],
   status: { status_code: 0, status_message: "SUCCESS" },
@@ -52,7 +52,7 @@ describe("CurrentConditions", () => {
     expect(screen.getByTestId("loading")).toBeInTheDocument();
   });
 
-  it("renders metric cards with observation data", async () => {
+  it("renders metric cards with formatted precision", async () => {
     mockFetch.mockResolvedValue({
       ok: true,
       json: () => Promise.resolve(mockObservations),
@@ -61,14 +61,18 @@ describe("CurrentConditions", () => {
     render(<CurrentConditions stationId={123} />);
 
     await waitFor(() => {
-      expect(screen.getByText("22.5")).toBeInTheDocument();
+      expect(screen.getByText("22.6")).toBeInTheDocument(); // temp: 1 decimal
     });
 
     expect(screen.getByText("Temperature")).toBeInTheDocument();
-    expect(screen.getByText("Feels 24°")).toBeInTheDocument();
-    expect(screen.getByText("3.2")).toBeInTheDocument();
-    expect(screen.getByText("65")).toBeInTheDocument();
-    expect(screen.getByText("1013")).toBeInTheDocument();
+    expect(screen.getByText("Feels 24.3°")).toBeInTheDocument(); // feels: 1 decimal
+    expect(screen.getByText("3.3")).toBeInTheDocument();          // wind: 1 decimal
+    expect(screen.getByText("65")).toBeInTheDocument();           // humidity: integer
+    expect(screen.getByText("1013.3")).toBeInTheDocument();       // pressure: 1 decimal
+    expect(screen.getByText("6.79")).toBeInTheDocument();         // uv: 2 decimals
+    expect(screen.getByText("0.57")).toBeInTheDocument();         // rain: 2 decimals
+    expect(screen.getByText("50124")).toBeInTheDocument();        // brightness: integer
+    expect(screen.getByText("Last 11 km")).toBeInTheDocument();   // lightning distance: integer
   });
 
   it("shows error with weather image and retry on fetch failure", async () => {
@@ -127,7 +131,7 @@ describe("CurrentConditions", () => {
     render(<CurrentConditions stationId={123} />);
 
     await waitFor(() => {
-      expect(screen.getByText("22.5")).toBeInTheDocument();
+      expect(screen.getByText("22.6")).toBeInTheDocument();
     });
 
     expect(mockFetch).toHaveBeenCalledTimes(1);

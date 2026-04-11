@@ -1,3 +1,5 @@
+import { formatValue } from "@/lib/format";
+
 export interface ForecastDayProps {
   dayLabel: string;
   conditions: string;
@@ -20,8 +22,8 @@ export function ForecastDay({
         {conditions}
       </span>
       <div className="flex gap-2 text-sm">
-        <span className="font-bold text-zinc-900">{highTemp}°</span>
-        <span className="text-zinc-400">{lowTemp}°</span>
+        <span className="font-bold text-zinc-900">{formatValue("temperature", highTemp)}°</span>
+        <span className="text-zinc-400">{formatValue("temperature", lowTemp)}°</span>
       </div>
       {precipProbability > 0 && (
         <span data-testid="precip" className="text-xs text-blue-500">

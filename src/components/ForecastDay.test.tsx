@@ -5,8 +5,8 @@ describe("ForecastDay", () => {
   const defaultProps = {
     dayLabel: "Mon",
     conditions: "Partly Cloudy",
-    highTemp: 28,
-    lowTemp: 18,
+    highTemp: 28.567,
+    lowTemp: 18.234,
     precipProbability: 30,
   };
 
@@ -15,10 +15,10 @@ describe("ForecastDay", () => {
     expect(screen.getByText("Mon")).toBeInTheDocument();
   });
 
-  it("renders high and low temperatures", () => {
+  it("renders high and low temperatures with 1 decimal", () => {
     render(<ForecastDay {...defaultProps} />);
-    expect(screen.getByText("28°")).toBeInTheDocument();
-    expect(screen.getByText("18°")).toBeInTheDocument();
+    expect(screen.getByText("28.6°")).toBeInTheDocument();
+    expect(screen.getByText("18.2°")).toBeInTheDocument();
   });
 
   it("renders conditions text", () => {

@@ -101,28 +101,33 @@ export default function HistoryView({ stationId }: HistoryViewProps) {
             label="Temperature"
             unit="°C"
             color="#ef4444"
+            precision={1}
           />
           <HistoryChart
             data={toChartData(obs, "sea_level_pressure", range)}
             label="Pressure"
             unit="mb"
             color="#3b82f6"
+            precision={1}
           />
           <HistoryChart
             data={toChartData(obs, "wind_avg", range)}
             label="Wind"
             unit="m/s"
             color="#10b981"
+            precision={1}
           />
           <HistoryChart
             data={toChartData(obs, "relative_humidity", range)}
             label="Humidity"
             unit="%"
             color="#8b5cf6"
+            precision={0}
           />
           <RainChart
             data={toChartData(obs, "precip", range)}
             unit="mm"
+            precision={2}
           />
         </div>
       )}

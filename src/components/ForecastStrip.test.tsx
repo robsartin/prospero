@@ -69,8 +69,8 @@ describe("ForecastStrip", () => {
       expect(screen.getByTestId("forecast-strip")).toBeInTheDocument();
     });
 
-    expect(screen.getByText("28°")).toBeInTheDocument();
-    expect(screen.getByText("18°")).toBeInTheDocument();
+    expect(screen.getByText("28.0°")).toBeInTheDocument();
+    expect(screen.getByText("18.0°")).toBeInTheDocument();
     expect(screen.getByText("Clear")).toBeInTheDocument();
     expect(screen.getByText("Rainy")).toBeInTheDocument();
   });
