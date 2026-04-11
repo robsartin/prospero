@@ -4,26 +4,25 @@ import type { StationObservation } from "@/lib/types";
 
 describe("DailySummary", () => {
   const obs: Partial<StationObservation> = {
-    air_temperature: 22,
-    feels_like: 24,
-    precip_accum_local_day: 2.5,
-    wind_gust: 12.3,
+    air_temperature: 22.567,
+    precip_accum_local_day: 2.567,
+    wind_gust: 12.345,
   };
 
-  it("renders high and low temperature", () => {
+  it("renders temperature with 1 decimal", () => {
     render(<DailySummary observation={obs as StationObservation} />);
-    expect(screen.getByText(/22°/)).toBeInTheDocument();
+    expect(screen.getByText(/22\.6°/)).toBeInTheDocument();
   });
 
-  it("renders total rain today", () => {
+  it("renders rain with 2 decimals", () => {
     render(<DailySummary observation={obs as StationObservation} />);
-    expect(screen.getByText(/2.5/)).toBeInTheDocument();
+    expect(screen.getByText(/2\.57/)).toBeInTheDocument();
     expect(screen.getByText(/Rain/i)).toBeInTheDocument();
   });
 
-  it("renders peak gust", () => {
+  it("renders peak gust with 1 decimal", () => {
     render(<DailySummary observation={obs as StationObservation} />);
-    expect(screen.getByText(/12.3/)).toBeInTheDocument();
+    expect(screen.getByText(/12\.3/)).toBeInTheDocument();
     expect(screen.getByText(/Gust/i)).toBeInTheDocument();
   });
 
