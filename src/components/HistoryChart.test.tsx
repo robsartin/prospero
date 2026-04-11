@@ -24,9 +24,14 @@ describe("HistoryChart", () => {
   ];
 
   it("renders chart with data", () => {
-    render(<HistoryChart data={mockData} label="Temperature" unit="°C" />);
+    render(<HistoryChart data={mockData} label="Temperature" unit="°C" precision={1} />);
     expect(screen.getByTestId("history-chart")).toBeInTheDocument();
     expect(screen.getByTestId("line-chart")).toBeInTheDocument();
+  });
+
+  it("accepts precision prop without error", () => {
+    render(<HistoryChart data={mockData} label="Rain" unit="mm" precision={2} />);
+    expect(screen.getByTestId("history-chart")).toBeInTheDocument();
   });
 
   it("renders label and unit in heading", () => {

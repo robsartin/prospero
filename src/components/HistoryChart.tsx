@@ -20,6 +20,7 @@ export interface HistoryChartProps {
   label: string;
   unit: string;
   color?: string;
+  precision?: number;
 }
 
 export default function HistoryChart({
@@ -27,10 +28,13 @@ export default function HistoryChart({
   label,
   unit,
   color = "#3b82f6",
+  precision = 1,
 }: HistoryChartProps) {
   if (data.length === 0) {
     return <p className="text-zinc-500">No history data available.</p>;
   }
+
+  const fmt = (v: number) => v.toFixed(precision);
 
   return (
     <div data-testid="history-chart">
@@ -41,8 +45,8 @@ export default function HistoryChart({
         <LineChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="time" tick={{ fontSize: 12 }} />
-          <YAxis tick={{ fontSize: 12 }} />
-          <Tooltip />
+          <YAxis tick={{ fontSize: 12 }} tickFormatter={fmt} />
+          <Tooltip formatter={(v: number) => [fmt(v), label]} />
           <Line
             type="monotone"
             dataKey="value"

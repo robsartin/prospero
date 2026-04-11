@@ -14,12 +14,15 @@ import type { HistoryDataPoint } from "./HistoryChart";
 interface RainChartProps {
   data: HistoryDataPoint[];
   unit: string;
+  precision?: number;
 }
 
-export default function RainChart({ data, unit }: RainChartProps) {
+export default function RainChart({ data, unit, precision = 2 }: RainChartProps) {
   if (data.length === 0) {
     return <p className="text-zinc-500">No rain data available.</p>;
   }
+
+  const fmt = (v: number) => v.toFixed(precision);
 
   return (
     <div data-testid="rain-chart">
@@ -28,8 +31,8 @@ export default function RainChart({ data, unit }: RainChartProps) {
         <AreaChart data={data}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="time" tick={{ fontSize: 12 }} />
-          <YAxis tick={{ fontSize: 12 }} />
-          <Tooltip />
+          <YAxis tick={{ fontSize: 12 }} tickFormatter={fmt} />
+          <Tooltip formatter={(v: number) => [fmt(v), "Rain"]} />
           <Area
             type="monotone"
             dataKey="value"
