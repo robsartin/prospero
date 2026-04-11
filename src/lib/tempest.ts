@@ -12,13 +12,16 @@ export function buildUrl(path: string, token: string): string {
   return url.toString();
 }
 
-async function fetchTempest<T>(path: string, token: string): Promise<T> {
-  const url = buildUrl(path, token);
+async function fetchUrl<T>(url: string): Promise<T> {
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Tempest API error: ${response.status} ${response.statusText}`);
   }
   return response.json() as Promise<T>;
+}
+
+async function fetchTempest<T>(path: string, token: string): Promise<T> {
+  return fetchUrl<T>(buildUrl(path, token));
 }
 
 export function fetchStations(token: string): Promise<StationsResponse> {
@@ -51,8 +54,9 @@ export function fetchObservationHistory(
   timeStart: number,
   timeEnd: number
 ): Promise<ObservationsResponse> {
-  return fetchTempest<ObservationsResponse>(
-    `/observations/station/${stationId}?time_start=${timeStart}&time_end=${timeEnd}`,
-    token
-  );
+  const url = buildUrl(`/observations/station/${stationId}`, token);
+  const parsed = new URL(url);
+  parsed.searchParams.set("time_start", String(timeStart));
+  parsed.searchParams.set("time_end", String(timeEnd));
+  return fetchUrl<ObservationsResponse>(parsed.toString());
 }

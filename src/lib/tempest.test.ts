@@ -104,6 +104,10 @@ describe("fetchForecast", () => {
 });
 
 describe("fetchObservationHistory", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
   it("fetches historical observations with time range", async () => {
     const mockResponse = {
       station_id: 123,
@@ -120,12 +124,23 @@ describe("fetchObservationHistory", () => {
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("observations/station/123")
     );
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining("time_start=1000")
-    );
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining("time_end=2000")
-    );
     expect(result.station_id).toBe(123);
+  });
+
+  it("constructs a valid URL with all params as query strings", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ obs: [] }),
+    } as Response);
+
+    await fetchObservationHistory(123, "tok", 1000, 2000);
+
+    const calledUrl = mockFetch.mock.calls[0][0] as string;
+    const url = new URL(calledUrl);
+    expect(url.searchParams.get("token")).toBe("tok");
+    expect(url.searchParams.get("time_start")).toBe("1000");
+    expect(url.searchParams.get("time_end")).toBe("2000");
+    // no double ? in URL
+    expect(calledUrl.split("?").length).toBe(2);
   });
 });
