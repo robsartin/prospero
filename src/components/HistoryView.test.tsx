@@ -129,7 +129,7 @@ describe("HistoryView", () => {
     });
 
     mockFetch.mockClear();
-    await user.click(screen.getByText("7d"));
+    await user.click(screen.getByText("5d"));
 
     await waitFor(() => {
       expect(mockFetch).toHaveBeenCalled();
@@ -142,9 +142,9 @@ describe("HistoryView", () => {
   it("renders TimeRangeSelector with all options", () => {
     mockFetch.mockReturnValue(new Promise(() => {}));
     render(<HistoryView deviceId={456} />);
+    expect(screen.getByText("1h")).toBeInTheDocument();
+    expect(screen.getByText("6h")).toBeInTheDocument();
     expect(screen.getByText("24h")).toBeInTheDocument();
-    expect(screen.getByText("7d")).toBeInTheDocument();
-    expect(screen.getByText("30d")).toBeInTheDocument();
-    expect(screen.getByText("1y")).toBeInTheDocument();
+    expect(screen.getByText("5d")).toBeInTheDocument();
   });
 });

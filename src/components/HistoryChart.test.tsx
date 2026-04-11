@@ -34,6 +34,11 @@ describe("HistoryChart", () => {
     expect(screen.getByTestId("history-chart")).toBeInTheDocument();
   });
 
+  it("accepts domain prop without error", () => {
+    render(<HistoryChart data={mockData} label="Temp" unit="°C" domain={[10, 30]} />);
+    expect(screen.getByTestId("history-chart")).toBeInTheDocument();
+  });
+
   it("renders label and unit in heading", () => {
     render(<HistoryChart data={mockData} label="Temperature" unit="°C" />);
     expect(screen.getByText("Temperature (°C)")).toBeInTheDocument();

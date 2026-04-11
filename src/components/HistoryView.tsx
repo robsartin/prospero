@@ -5,6 +5,7 @@ import TimeRangeSelector, { type TimeRange } from "./TimeRangeSelector";
 import HistoryChart, { type HistoryDataPoint } from "./HistoryChart";
 import RainChart from "./RainChart";
 import { MetricUnitStrategy, type UnitStrategy } from "@/lib/units";
+import { tempDomain, pressureDomain, zeroBasedDomain } from "@/lib/chartDomain";
 import type { TransformedObservation } from "@/lib/transforms";
 
 interface HistoryViewProps {
@@ -13,21 +14,21 @@ interface HistoryViewProps {
 }
 
 const RANGE_SECONDS: Record<TimeRange, number> = {
+  "1h": 3600,
+  "6h": 21600,
   "24h": 86400,
-  "7d": 604800,
-  "30d": 2592000,
-  "1y": 31536000,
+  "5d": 432000,
 };
 
 function formatTime(epoch: number, range: TimeRange): string {
   const date = new Date(epoch * 1000);
+  if (range === "1h" || range === "6h") {
+    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  }
   if (range === "24h") {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   }
-  if (range === "7d" || range === "30d") {
-    return date.toLocaleDateString([], { month: "short", day: "numeric" });
-  }
-  return date.toLocaleDateString([], { month: "short", year: "2-digit" });
+  return date.toLocaleDateString([], { month: "short", day: "numeric" });
 }
 
 function toChartData(
@@ -92,6 +93,12 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
     return <p className="text-zinc-500">Select a station to view history.</p>;
   }
 
+  const tempData = toChartData(obs, "airTemperature", range, units.temp);
+  const pressureData = toChartData(obs, "stationPressure", range, units.pressure);
+  const windData = toChartData(obs, "windAvg", range, units.wind);
+  const humidityData = toChartData(obs, "relativeHumidity", range);
+  const rainData = toChartData(obs, "rainAccumulated", range, units.rain);
+
   return (
     <div className="space-y-6">
       <TimeRangeSelector selected={range} onChange={setRange} />
@@ -102,37 +109,42 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
       {!pending && !error && (
         <div className="space-y-8">
           <HistoryChart
-            data={toChartData(obs, "airTemperature", range, units.temp)}
+            data={tempData}
             label="Temperature"
             unit={units.labels.temp}
             color="#ef4444"
             precision={1}
+            domain={tempDomain(tempData)}
           />
           <HistoryChart
-            data={toChartData(obs, "stationPressure", range, units.pressure)}
+            data={pressureData}
             label="Pressure"
             unit={units.labels.pressure}
             color="#3b82f6"
             precision={1}
+            domain={pressureDomain(pressureData)}
           />
           <HistoryChart
-            data={toChartData(obs, "windAvg", range, units.wind)}
+            data={windData}
             label="Wind"
             unit={units.labels.wind}
             color="#10b981"
             precision={1}
+            domain={zeroBasedDomain(windData)}
           />
           <HistoryChart
-            data={toChartData(obs, "relativeHumidity", range)}
+            data={humidityData}
             label="Humidity"
             unit="%"
             color="#8b5cf6"
             precision={0}
+            domain={zeroBasedDomain(humidityData)}
           />
           <RainChart
-            data={toChartData(obs, "rainAccumulated", range, units.rain)}
+            data={rainData}
             unit={units.labels.rain}
             precision={2}
+            domain={zeroBasedDomain(rainData)}
           />
         </div>
       )}

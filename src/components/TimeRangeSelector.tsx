@@ -1,4 +1,4 @@
-const RANGES = ["24h", "7d", "30d", "1y"] as const;
+const RANGES = ["1h", "6h", "24h", "5d"] as const;
 
 export type TimeRange = (typeof RANGES)[number];
 
