@@ -3,7 +3,7 @@ import {
   fetchStations,
   fetchObservations,
   fetchForecast,
-  fetchObservationHistory,
+  fetchDeviceHistory,
 } from "./tempest";
 
 describe("buildUrl", () => {
@@ -110,11 +110,12 @@ describe("fetchForecast", () => {
   });
 });
 
-describe("fetchObservationHistory", () => {
-  it("fetches historical observations with correct URL params", async () => {
+describe("fetchDeviceHistory", () => {
+  it("calls the device endpoint with time range params", async () => {
     const mockResponse = {
-      station_id: 123,
-      obs: [{ air_temperature: 20 }],
+      device_id: 456,
+      type: "obs_st",
+      obs: [[1681000000, 0.5, 1.2, 2.3, 180, 3, 1013, 22.5, 65, 50000, 6, 845, 0, 0, 15, 2, 2.6, 1]],
       status: { status_code: 0, status_message: "SUCCESS" },
     };
     mockFetch.mockResolvedValue({
@@ -122,13 +123,14 @@ describe("fetchObservationHistory", () => {
       json: () => Promise.resolve(mockResponse),
     } as Response);
 
-    const result = await fetchObservationHistory(123, "test-token", 1000, 2000);
+    const result = await fetchDeviceHistory(456, "test-token", 1000, 2000);
 
     const calledUrl = new URL(mockFetch.mock.calls[0][0] as string);
-    expect(calledUrl.pathname).toBe("/swd/rest/observations/station/123");
+    expect(calledUrl.pathname).toBe("/swd/rest/observations/device/456");
     expect(calledUrl.searchParams.get("token")).toBe("test-token");
     expect(calledUrl.searchParams.get("time_start")).toBe("1000");
     expect(calledUrl.searchParams.get("time_end")).toBe("2000");
-    expect(result.station_id).toBe(123);
+    expect(result.device_id).toBe(456);
+    expect(result.obs[0]).toBeInstanceOf(Array);
   });
 });

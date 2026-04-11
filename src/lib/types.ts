@@ -111,6 +111,13 @@ export interface ObservationsResponse {
   status: Status;
 }
 
+export interface DeviceObservationsResponse {
+  device_id: number;
+  type: string;
+  obs: (number | null)[][];
+  status: Status;
+}
+
 // --- Forecast ---
 
 export interface ForecastDay {
