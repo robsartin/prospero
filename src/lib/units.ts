@@ -1,31 +1,78 @@
-export type UnitSystem = "metric" | "imperial";
+export type UnitSystemId = "metric" | "imperial";
 
-export function convertTemp(celsius: number, system: UnitSystem): number {
-  if (system === "imperial") return celsius * 9 / 5 + 32;
-  return celsius;
-}
-
-export function convertWind(ms: number, system: UnitSystem): number {
-  if (system === "imperial") return ms * 2.23694;
-  return ms;
-}
-
-export function convertPressure(mb: number, system: UnitSystem): number {
-  if (system === "imperial") return mb * 0.02953;
-  return mb;
-}
-
-export function convertRain(mm: number, system: UnitSystem): number {
-  if (system === "imperial") return mm / 25.4;
-  return mm;
-}
-
-export const UNIT_LABELS: Record<UnitSystem, {
+export interface UnitLabels {
   temp: string;
   wind: string;
   pressure: string;
   rain: string;
-}> = {
-  metric: { temp: "°C", wind: "m/s", pressure: "mb", rain: "mm" },
-  imperial: { temp: "°F", wind: "mph", pressure: "inHg", rain: "in" },
+}
+
+export interface UnitStrategy {
+  readonly id: UnitSystemId;
+  readonly labels: UnitLabels;
+  temp(celsius: number): number;
+  wind(ms: number): number;
+  pressure(mb: number): number;
+  rain(mm: number): number;
+}
+
+export class MetricUnitStrategy implements UnitStrategy {
+  readonly id: UnitSystemId = "metric";
+  readonly labels: UnitLabels = {
+    temp: "°C",
+    wind: "m/s",
+    pressure: "mb",
+    rain: "mm",
+  };
+
+  temp(celsius: number): number {
+    return celsius;
+  }
+
+  wind(ms: number): number {
+    return ms;
+  }
+
+  pressure(mb: number): number {
+    return mb;
+  }
+
+  rain(mm: number): number {
+    return mm;
+  }
+}
+
+export class ImperialUnitStrategy implements UnitStrategy {
+  readonly id: UnitSystemId = "imperial";
+  readonly labels: UnitLabels = {
+    temp: "°F",
+    wind: "mph",
+    pressure: "inHg",
+    rain: "in",
+  };
+
+  temp(celsius: number): number {
+    return celsius * 9 / 5 + 32;
+  }
+
+  wind(ms: number): number {
+    return ms * 2.23694;
+  }
+
+  pressure(mb: number): number {
+    return mb * 0.02953;
+  }
+
+  rain(mm: number): number {
+    return mm / 25.4;
+  }
+}
+
+const strategies: Record<UnitSystemId, UnitStrategy> = {
+  metric: new MetricUnitStrategy(),
+  imperial: new ImperialUnitStrategy(),
 };
+
+export function getUnitStrategy(id: UnitSystemId): UnitStrategy {
+  return strategies[id];
+}

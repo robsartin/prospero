@@ -1,20 +1,20 @@
-import type { UnitSystem } from "@/lib/units";
+import type { UnitStrategy, UnitSystemId } from "@/lib/units";
 
 interface UnitToggleProps {
-  system: UnitSystem;
-  onChange: (system: UnitSystem) => void;
+  units: UnitStrategy;
+  onChange: (id: UnitSystemId) => void;
 }
 
-export default function UnitToggle({ system, onChange }: UnitToggleProps) {
-  const toggle = () => onChange(system === "metric" ? "imperial" : "metric");
+export default function UnitToggle({ units, onChange }: UnitToggleProps) {
+  const nextId: UnitSystemId = units.id === "metric" ? "imperial" : "metric";
 
   return (
     <button
-      onClick={toggle}
+      onClick={() => onChange(nextId)}
       className="rounded border border-zinc-600 bg-zinc-800 px-2 py-1 text-sm text-white hover:bg-zinc-700"
-      title={`Switch to ${system === "metric" ? "imperial" : "metric"}`}
+      title={`Switch to ${nextId}`}
     >
-      {system === "metric" ? "°C" : "°F"}
+      {units.labels.temp}
     </button>
   );
 }

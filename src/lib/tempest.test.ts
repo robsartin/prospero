@@ -60,6 +60,10 @@ describe("fetchStations", () => {
 });
 
 describe("fetchObservations", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
   it("fetches observations for a station", async () => {
     const mockResponse = {
       station_id: 456,
@@ -81,6 +85,10 @@ describe("fetchObservations", () => {
 });
 
 describe("fetchForecast", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
   it("fetches forecast for a station", async () => {
     const mockResponse = {
       forecast: {
@@ -96,14 +104,20 @@ describe("fetchForecast", () => {
 
     const result = await fetchForecast(789, "test-token");
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      "https://swd.weatherflow.com/swd/rest/forecast/station/789?token=test-token"
-    );
+    const calledUrl = mockFetch.mock.calls[0][0] as string;
+    const url = new URL(calledUrl);
+    expect(url.pathname).toBe("/swd/rest/better_forecast");
+    expect(url.searchParams.get("station_id")).toBe("789");
+    expect(url.searchParams.get("token")).toBe("test-token");
     expect(result.forecast.daily[0].air_temp_high).toBe(30);
   });
 });
 
 describe("fetchObservationHistory", () => {
+  beforeEach(() => {
+    mockFetch.mockReset();
+  });
+
   it("fetches historical observations with time range", async () => {
     const mockResponse = {
       station_id: 123,
@@ -120,12 +134,23 @@ describe("fetchObservationHistory", () => {
     expect(mockFetch).toHaveBeenCalledWith(
       expect.stringContaining("observations/station/123")
     );
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining("time_start=1000")
-    );
-    expect(mockFetch).toHaveBeenCalledWith(
-      expect.stringContaining("time_end=2000")
-    );
     expect(result.station_id).toBe(123);
+  });
+
+  it("constructs a valid URL with all params as query strings", async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ obs: [] }),
+    } as Response);
+
+    await fetchObservationHistory(123, "tok", 1000, 2000);
+
+    const calledUrl = mockFetch.mock.calls[0][0] as string;
+    const url = new URL(calledUrl);
+    expect(url.searchParams.get("token")).toBe("tok");
+    expect(url.searchParams.get("time_start")).toBe("1000");
+    expect(url.searchParams.get("time_end")).toBe("2000");
+    // no double ? in URL
+    expect(calledUrl.split("?").length).toBe(2);
   });
 });
