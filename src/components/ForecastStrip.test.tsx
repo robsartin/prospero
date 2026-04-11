@@ -71,8 +71,10 @@ describe("ForecastStrip", () => {
 
     expect(screen.getByText("28.0°")).toBeInTheDocument();
     expect(screen.getByText("18.0°")).toBeInTheDocument();
-    expect(screen.getByText("Clear")).toBeInTheDocument();
-    expect(screen.getByText("Rainy")).toBeInTheDocument();
+    const emojis = screen.getAllByTestId("weather-emoji");
+    expect(emojis).toHaveLength(2);
+    expect(emojis[0]).toHaveAttribute("title", "Clear");
+    expect(emojis[1]).toHaveAttribute("title", "Rainy");
   });
 
   it("shows error on fetch failure with weather image and retry", async () => {

@@ -87,6 +87,7 @@ export default function ForecastStrip({ stationId }: ForecastStripProps) {
           <ForecastDay
             key={day.day_start_local}
             dayLabel={dayLabel}
+            icon={day.icon}
             conditions={day.conditions}
             highTemp={day.air_temp_high}
             lowTemp={day.air_temp_low}
