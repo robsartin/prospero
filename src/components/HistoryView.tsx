@@ -132,7 +132,7 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
             unit={units.labels.pressure}
             color="#3b82f6"
             precision={1}
-            domain={pressureDomain(pressureData)}
+            domain={pressureDomain()}
           />
           <HistoryChart
             data={windData}
