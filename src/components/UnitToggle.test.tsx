@@ -17,19 +17,23 @@ describe("UnitToggle", () => {
     expect(screen.getByText("°F")).toBeInTheDocument();
   });
 
-  it("calls onChange with 'imperial' when metric", async () => {
+  it("emits imperial strategy when currently metric", async () => {
     const onChange = jest.fn();
     const user = userEvent.setup();
     render(<UnitToggle units={metric} onChange={onChange} />);
     await user.click(screen.getByRole("button"));
-    expect(onChange).toHaveBeenCalledWith("imperial");
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "imperial" })
+    );
   });
 
-  it("calls onChange with 'metric' when imperial", async () => {
+  it("emits metric strategy when currently imperial", async () => {
     const onChange = jest.fn();
     const user = userEvent.setup();
     render(<UnitToggle units={imperial} onChange={onChange} />);
     await user.click(screen.getByRole("button"));
-    expect(onChange).toHaveBeenCalledWith("metric");
+    expect(onChange).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "metric" })
+    );
   });
 });

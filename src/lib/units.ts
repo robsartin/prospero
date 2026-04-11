@@ -16,6 +16,9 @@ export interface UnitStrategy {
   rain(mm: number): number;
 }
 
+// Metric is the canonical internal representation — all API data arrives in
+// metric units. Identity methods exist to satisfy the UnitStrategy interface
+// so consumers don't need to special-case metric vs imperial.
 export class MetricUnitStrategy implements UnitStrategy {
   readonly id: UnitSystemId = "metric";
   readonly labels: UnitLabels = {

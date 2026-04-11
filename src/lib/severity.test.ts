@@ -1,4 +1,4 @@
-import { getSeverity, type Severity } from "./severity";
+import { getSeverity } from "./severity";
 
 describe("getSeverity", () => {
   describe("temperature", () => {
