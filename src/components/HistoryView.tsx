@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import TimeRangeSelector from "./TimeRangeSelector";
 import HistoryChart, { type HistoryDataPoint } from "./HistoryChart";
 import RainChart from "./RainChart";
+import LightningChart from "./LightningChart";
 import { MetricUnitStrategy, type UnitStrategy } from "@/lib/units";
 import { tempDomain, pressureDomain, zeroBasedDomain } from "@/lib/chartDomain";
 import { getTimeRange, chunkTimeRange, type TimeRange } from "@/lib/timeRanges";
@@ -110,6 +111,7 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
   const windData = toChartData(obs, "windAvg", range, units.wind, "windDirection");
   const humidityData = toChartData(obs, "relativeHumidity", range);
   const rainData = toChartData(obs, "rainAccumulated", range, units.rain);
+  const lightningData = toChartData(obs, "lightningStrikeCount", range);
 
   return (
     <div className="space-y-6">
@@ -158,6 +160,10 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
             unit={units.labels.rain}
             precision={2}
             domain={zeroBasedDomain(rainData)}
+          />
+          <LightningChart
+            data={lightningData}
+            domain={zeroBasedDomain(lightningData)}
           />
         </div>
       )}
