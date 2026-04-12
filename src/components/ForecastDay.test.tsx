@@ -32,10 +32,10 @@ describe("ForecastDay", () => {
     expect(screen.getByTestId("weather-emoji")).toHaveTextContent("☀️");
   });
 
-  it("renders high and low temperatures with 1 decimal", () => {
+  it("renders high and low temperatures as integers", () => {
     render(<ForecastDay {...defaultProps} />);
-    expect(screen.getByText("28.6°")).toBeInTheDocument();
-    expect(screen.getByText("18.2°")).toBeInTheDocument();
+    expect(screen.getByText("29°")).toBeInTheDocument();
+    expect(screen.getByText("18°")).toBeInTheDocument();
   });
 
   it("shows conditions as title on emoji", () => {

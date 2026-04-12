@@ -70,8 +70,8 @@ describe("ForecastStrip", () => {
       expect(screen.getByTestId("forecast-strip")).toBeInTheDocument();
     });
 
-    expect(screen.getByText("28.0°")).toBeInTheDocument();
-    expect(screen.getByText("18.0°")).toBeInTheDocument();
+    expect(screen.getByText("28°")).toBeInTheDocument();
+    expect(screen.getByText("18°")).toBeInTheDocument();
     const emojis = screen.getAllByTestId("weather-emoji");
     expect(emojis).toHaveLength(2);
     expect(emojis[0]).toHaveAttribute("title", "Clear");
@@ -90,9 +90,9 @@ describe("ForecastStrip", () => {
       expect(screen.getByTestId("forecast-strip")).toBeInTheDocument();
     });
 
-    // 28°C → 82.4°F, 18°C → 64.4°F
-    expect(screen.getByText("82.4°")).toBeInTheDocument();
-    expect(screen.getByText("64.4°")).toBeInTheDocument();
+    // 28°C → 82°F, 18°C → 64°F (integer)
+    expect(screen.getByText("82°")).toBeInTheDocument();
+    expect(screen.getByText("64°")).toBeInTheDocument();
   });
 
   it("shows error on fetch failure with weather image and retry", async () => {

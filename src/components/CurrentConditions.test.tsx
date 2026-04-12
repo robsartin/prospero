@@ -62,12 +62,12 @@ describe("CurrentConditions", () => {
     render(<CurrentConditions stationId={123} />);
 
     await waitFor(() => {
-      expect(screen.getByText("22.6")).toBeInTheDocument(); // temp: 1 decimal
+      expect(screen.getByText("23")).toBeInTheDocument(); // temp: integer
     });
 
     expect(screen.getByText("Temperature")).toBeInTheDocument();
-    expect(screen.getByText("Feels 24.3°")).toBeInTheDocument(); // feels: 1 decimal
-    expect(screen.getByText("3.3")).toBeInTheDocument();          // wind: 1 decimal
+    expect(screen.getByText("Feels 24°")).toBeInTheDocument(); // feels: integer
+    expect(screen.getByText("3.3")).toBeInTheDocument();        // wind: 1 decimal
     expect(screen.getByText(/Gust 5\.2.*S/)).toBeInTheDocument(); // gust + compass S (180°)
     expect(screen.getByText("65")).toBeInTheDocument();           // humidity: integer
     expect(screen.getByText("1013.3")).toBeInTheDocument();       // pressure: 1 decimal
@@ -86,8 +86,8 @@ describe("CurrentConditions", () => {
     render(<CurrentConditions stationId={123} units={new ImperialUnitStrategy()} />);
 
     await waitFor(() => {
-      // 22.567°C → 72.6°F (1 decimal)
-      expect(screen.getByText("72.6")).toBeInTheDocument();
+      // 22.567°C → 73°F (integer)
+      expect(screen.getByText("73")).toBeInTheDocument();
     });
 
     // Unit labels should be imperial
@@ -152,7 +152,7 @@ describe("CurrentConditions", () => {
     render(<CurrentConditions stationId={123} />);
 
     await waitFor(() => {
-      expect(screen.getByText("22.6")).toBeInTheDocument();
+      expect(screen.getByText("23")).toBeInTheDocument();
     });
 
     expect(mockFetch).toHaveBeenCalledTimes(1);
