@@ -32,13 +32,15 @@ function toChartData(
   obs: TransformedObservation[],
   field: keyof TransformedObservation,
   range: TimeRange,
-  convert: (v: number) => number = (v) => v
+  convert: (v: number) => number = (v) => v,
+  directionField?: keyof TransformedObservation
 ): HistoryDataPoint[] {
   return obs
     .filter((o) => o[field] != null)
     .map((o) => ({
       time: formatTime(o.timestamp, range),
       value: convert(o[field] as number),
+      direction: directionField ? (o[directionField] as number | null) : undefined,
     }));
 }
 
@@ -105,7 +107,7 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
 
   const tempData = toChartData(obs, "airTemperature", range, units.temp);
   const pressureData = toChartData(obs, "stationPressure", range, units.pressure);
-  const windData = toChartData(obs, "windAvg", range, units.wind);
+  const windData = toChartData(obs, "windAvg", range, units.wind, "windDirection");
   const humidityData = toChartData(obs, "relativeHumidity", range);
   const rainData = toChartData(obs, "rainAccumulated", range, units.rain);
 
@@ -140,6 +142,7 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
             unit={units.labels.wind}
             color="#10b981"
             precision={1}
+            showWindArrows
             domain={zeroBasedDomain(windData)}
           />
           <HistoryChart
