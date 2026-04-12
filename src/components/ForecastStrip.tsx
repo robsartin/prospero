@@ -94,6 +94,7 @@ export default function ForecastStrip({ stationId, units = DEFAULT_UNITS }: Fore
             conditions={day.conditions}
             highTemp={units.temp(day.air_temp_high)}
             lowTemp={units.temp(day.air_temp_low)}
+            rawHighTempC={day.air_temp_high}
             precipProbability={day.precip_probability}
           />
         );
