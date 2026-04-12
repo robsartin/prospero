@@ -9,10 +9,12 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
+import { WindArrow } from "./WindArrow";
 
 export interface HistoryDataPoint {
   time: string;
   value: number;
+  direction?: number | null;
 }
 
 export interface HistoryChartProps {
@@ -22,7 +24,10 @@ export interface HistoryChartProps {
   color?: string;
   precision?: number;
   domain?: [number, number];
+  showWindArrows?: boolean;
 }
+
+const ARROW_SAMPLE_INTERVAL = 10;
 
 export default function HistoryChart({
   data,
@@ -31,6 +36,7 @@ export default function HistoryChart({
   color = "#3b82f6",
   precision = 1,
   domain,
+  showWindArrows = false,
 }: HistoryChartProps) {
   if (data.length === 0) {
     return <p className="text-zinc-500">No history data available.</p>;
@@ -53,7 +59,13 @@ export default function HistoryChart({
             type="monotone"
             dataKey="value"
             stroke={color}
-            dot={false}
+            dot={showWindArrows
+              ? (props: { cx?: number; cy?: number; index?: number; payload?: HistoryDataPoint }) => {
+                  const { cx, cy, index, payload } = props;
+                  if (!cx || !cy || index == null || index % ARROW_SAMPLE_INTERVAL !== 0) return <></>;
+                  return <WindArrow cx={cx} cy={cy} direction={payload?.direction ?? null} />;
+                }
+              : false}
             strokeWidth={2}
           />
         </LineChart>

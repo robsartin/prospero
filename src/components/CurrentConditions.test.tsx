@@ -68,6 +68,7 @@ describe("CurrentConditions", () => {
     expect(screen.getByText("Temperature")).toBeInTheDocument();
     expect(screen.getByText("Feels 24.3°")).toBeInTheDocument(); // feels: 1 decimal
     expect(screen.getByText("3.3")).toBeInTheDocument();          // wind: 1 decimal
+    expect(screen.getByText(/Gust 5\.2.*S/)).toBeInTheDocument(); // gust + compass S (180°)
     expect(screen.getByText("65")).toBeInTheDocument();           // humidity: integer
     expect(screen.getByText("1013.3")).toBeInTheDocument();       // pressure: 1 decimal
     expect(screen.getByText("6.79")).toBeInTheDocument();         // uv: 2 decimals
