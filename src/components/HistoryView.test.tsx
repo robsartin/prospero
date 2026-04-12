@@ -13,6 +13,7 @@ jest.mock("recharts", () => ({
   Area: () => <div />,
   Bar: () => <div />,
   Scatter: () => <div />,
+  Legend: () => <div />,
   XAxis: () => <div />,
   YAxis: () => <div />,
   Tooltip: () => <div />,

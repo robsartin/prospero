@@ -8,9 +8,18 @@ function ceilTo(value: number, step: number): number {
   return Math.ceil(value / step) * step;
 }
 
+const TEMP_SERIES_KEYS = ["value", "heatIndex", "windChill", "wetBulb"] as const;
+
 export function tempDomain(data: HistoryDataPoint[]): [number, number] {
   if (data.length === 0) return [0, 50];
-  const values = data.map((d) => d.value);
+  const values: number[] = [];
+  for (const d of data) {
+    for (const k of TEMP_SERIES_KEYS) {
+      const v = d[k];
+      if (typeof v === "number") values.push(v);
+    }
+  }
+  if (values.length === 0) return [0, 50];
   return [floorTo(Math.min(...values), 5) - 5, ceilTo(Math.max(...values), 5) + 5];
 }
 
