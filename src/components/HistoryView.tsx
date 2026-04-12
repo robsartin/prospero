@@ -127,7 +127,7 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
             label="Temperature"
             unit={units.labels.temp}
             color="#ef4444"
-            precision={1}
+            precision={0}
             domain={tempDomain(tempData)}
           />
           <HistoryChart

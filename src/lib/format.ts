@@ -12,9 +12,9 @@ export type MetricKind =
   | "rain";
 
 const PRECISION: Record<MetricKind, number> = {
-  temperature: 1,
-  dew_point: 1,
-  feels_like: 1,
+  temperature: 0,
+  dew_point: 0,
+  feels_like: 0,
   wind: 1,
   pressure: 1,
   humidity: 0,

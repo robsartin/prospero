@@ -9,9 +9,9 @@ describe("DailySummary", () => {
     wind_gust: 12.345,
   };
 
-  it("renders temperature with 1 decimal", () => {
+  it("renders temperature as integer", () => {
     render(<DailySummary observation={obs as StationObservation} />);
-    expect(screen.getByText(/22\.6°/)).toBeInTheDocument();
+    expect(screen.getByText(/23°/)).toBeInTheDocument();
   });
 
   it("renders rain with 2 decimals", () => {
