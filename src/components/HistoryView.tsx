@@ -6,6 +6,8 @@ import HistoryChart, { type HistoryDataPoint } from "./HistoryChart";
 import RainChart from "./RainChart";
 import LightningChart from "./LightningChart";
 import IlluminanceChart from "./IlluminanceChart";
+import BatteryChart from "./BatteryChart";
+import { voltageToPercent } from "@/lib/battery";
 import { MetricUnitStrategy, type UnitStrategy } from "@/lib/units";
 import { tempDomain, pressureDomain, zeroBasedDomain } from "@/lib/chartDomain";
 import { getTimeRange, chunkTimeRange, type TimeRange } from "@/lib/timeRanges";
@@ -116,6 +118,7 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
   const rainData = toChartData(obs, "rainAccumulated", range, units.rain, undefined, "precipType");
   const lightningData = toChartData(obs, "lightningStrikeCount", range);
   const illuminanceData = toChartData(obs, "illuminance", range);
+  const batteryData = toChartData(obs, "battery", range, (v) => voltageToPercent(v) ?? 0);
 
   return (
     <div className="space-y-6">
@@ -173,6 +176,7 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
             data={illuminanceData}
             domain={zeroBasedDomain(illuminanceData)}
           />
+          <BatteryChart data={batteryData} />
         </div>
       )}
     </div>
