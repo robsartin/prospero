@@ -8,6 +8,7 @@ import LightningChart from "./LightningChart";
 import IlluminanceChart from "./IlluminanceChart";
 import BatteryChart from "./BatteryChart";
 import { voltageToPercent } from "@/lib/battery";
+import { heatIndexC, windChillC, wetBulbC } from "@/lib/comfortMetrics";
 import { MetricUnitStrategy, type UnitStrategy } from "@/lib/units";
 import { tempDomain, pressureDomain, zeroBasedDomain } from "@/lib/chartDomain";
 import { getTimeRange, chunkTimeRange, type TimeRange } from "@/lib/timeRanges";
@@ -30,6 +31,30 @@ function formatTime(epoch: number, range: TimeRange): string {
     return date.toLocaleDateString([], { month: "short", day: "numeric" });
   }
   return date.toLocaleDateString([], { month: "short", year: "2-digit" });
+}
+
+function toTempSeriesData(
+  obs: TransformedObservation[],
+  range: TimeRange,
+  convertTemp: (v: number) => number
+): HistoryDataPoint[] {
+  return obs
+    .filter((o) => o.airTemperature != null)
+    .map((o) => {
+      const t = o.airTemperature as number;
+      const rh = o.relativeHumidity;
+      const w = o.windAvg;
+      const hi = heatIndexC(t, rh);
+      const wc = windChillC(t, w);
+      const wb = wetBulbC(t, rh);
+      return {
+        time: formatTime(o.timestamp, range),
+        value: convertTemp(t),
+        heatIndex: hi != null ? convertTemp(hi) : null,
+        windChill: wc != null ? convertTemp(wc) : null,
+        wetBulb: wb != null ? convertTemp(wb) : null,
+      };
+    });
 }
 
 function toChartData(
@@ -111,7 +136,7 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
     return <p className="text-zinc-500">Select a station to view history.</p>;
   }
 
-  const tempData = toChartData(obs, "airTemperature", range, units.temp);
+  const tempData = toTempSeriesData(obs, range, units.temp);
   const pressureData = toChartData(obs, "stationPressure", range, units.pressure);
   const windData = toChartData(obs, "windAvg", range, units.wind, "windDirection");
   const humidityData = toChartData(obs, "relativeHumidity", range);
@@ -133,9 +158,14 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
             data={tempData}
             label="Temperature"
             unit={units.labels.temp}
-            color="#ef4444"
             precision={0}
             domain={tempDomain(tempData)}
+            series={[
+              { dataKey: "value", label: "Air", color: "#ef4444" },
+              { dataKey: "heatIndex", label: "Heat index", color: "#f97316" },
+              { dataKey: "windChill", label: "Wind chill", color: "#0ea5e9" },
+              { dataKey: "wetBulb", label: "Wet bulb", color: "#8b5cf6" },
+            ]}
           />
           <HistoryChart
             data={pressureData}

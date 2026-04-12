@@ -14,6 +14,14 @@ describe("tempDomain", () => {
     const data = [{ time: "", value: -8 }, { time: "", value: 3 }];
     expect(tempDomain(data)).toEqual([-15, 10]);
   });
+
+  it("considers heat index, wind chill, and wet bulb series when present", () => {
+    const data = [
+      { time: "", value: 30, heatIndex: 42, wetBulb: 24 },
+      { time: "", value: 32, heatIndex: 45, wetBulb: 26 },
+    ];
+    expect(tempDomain(data)).toEqual([15, 50]);
+  });
 });
 
 describe("pressureDomain", () => {

@@ -9,7 +9,10 @@ jest.mock("recharts", () => ({
   LineChart: ({ children }: { children: React.ReactNode }) => (
     <div data-testid="line-chart">{children}</div>
   ),
-  Line: () => <div data-testid="line" />,
+  Line: ({ dataKey }: { dataKey?: string }) => (
+    <div data-testid="line" data-datakey={dataKey} />
+  ),
+  Legend: () => <div data-testid="legend" />,
   XAxis: () => <div data-testid="x-axis" />,
   YAxis: () => <div data-testid="y-axis" />,
   Tooltip: () => <div data-testid="tooltip" />,
@@ -47,5 +50,39 @@ describe("HistoryChart", () => {
   it("shows empty state when no data", () => {
     render(<HistoryChart data={[]} label="Temperature" unit="°C" />);
     expect(screen.getByText("No history data available.")).toBeInTheDocument();
+  });
+
+  it("renders one line per series when series prop provided", () => {
+    const multiData = [
+      { time: "12:00", value: 22, heatIndex: 28, windChill: null, wetBulb: 20 },
+      { time: "13:00", value: 23, heatIndex: 29, windChill: null, wetBulb: 21 },
+    ];
+    render(
+      <HistoryChart
+        data={multiData}
+        label="Temperature"
+        unit="°C"
+        series={[
+          { dataKey: "value", label: "Air", color: "#ef4444" },
+          { dataKey: "heatIndex", label: "Heat index", color: "#f59e0b" },
+          { dataKey: "wetBulb", label: "Wet bulb", color: "#3b82f6" },
+        ]}
+      />
+    );
+    const lines = screen.getAllByTestId("line");
+    expect(lines).toHaveLength(3);
+    expect(lines.map((l) => l.getAttribute("data-datakey"))).toEqual([
+      "value",
+      "heatIndex",
+      "wetBulb",
+    ]);
+    expect(screen.getByTestId("legend")).toBeInTheDocument();
+  });
+
+  it("renders a single line with dataKey=value when series prop omitted", () => {
+    render(<HistoryChart data={mockData} label="Temperature" unit="°C" />);
+    const lines = screen.getAllByTestId("line");
+    expect(lines).toHaveLength(1);
+    expect(lines[0].getAttribute("data-datakey")).toBe("value");
   });
 });

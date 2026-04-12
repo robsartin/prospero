@@ -4,6 +4,7 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  Legend,
   XAxis,
   YAxis,
   Tooltip,
@@ -16,6 +17,13 @@ export interface HistoryDataPoint {
   value: number;
   direction?: number | null;
   precipType?: number | null;
+  [key: string]: string | number | null | undefined;
+}
+
+export interface HistorySeries {
+  dataKey: string;
+  label: string;
+  color: string;
 }
 
 export interface HistoryChartProps {
@@ -26,6 +34,7 @@ export interface HistoryChartProps {
   precision?: number;
   domain?: [number, number];
   showWindArrows?: boolean;
+  series?: HistorySeries[];
 }
 
 const ARROW_SAMPLE_INTERVAL = 10;
@@ -38,6 +47,7 @@ export default function HistoryChart({
   precision = 1,
   domain,
   showWindArrows = false,
+  series,
 }: HistoryChartProps) {
   if (data.length === 0) {
     return <p className="text-zinc-500">No history data available.</p>;
@@ -56,19 +66,35 @@ export default function HistoryChart({
           <XAxis dataKey="time" tick={{ fontSize: 12 }} />
           <YAxis tick={{ fontSize: 12 }} tickFormatter={fmt} domain={domain} />
           <Tooltip formatter={(v) => [fmt(Number(v)), label]} />
-          <Line
-            type="monotone"
-            dataKey="value"
-            stroke={color}
-            dot={showWindArrows
-              ? (props: { cx?: number; cy?: number; index?: number; payload?: HistoryDataPoint }) => {
-                  const { cx, cy, index, payload } = props;
-                  if (!cx || !cy || index == null || index % ARROW_SAMPLE_INTERVAL !== 0) return <></>;
-                  return <WindArrow cx={cx} cy={cy} direction={payload?.direction ?? null} />;
-                }
-              : false}
-            strokeWidth={2}
-          />
+          {series && <Legend />}
+          {series ? (
+            series.map((s) => (
+              <Line
+                key={s.dataKey}
+                type="monotone"
+                dataKey={s.dataKey}
+                name={s.label}
+                stroke={s.color}
+                strokeWidth={2}
+                dot={false}
+                connectNulls
+              />
+            ))
+          ) : (
+            <Line
+              type="monotone"
+              dataKey="value"
+              stroke={color}
+              dot={showWindArrows
+                ? (props: { cx?: number; cy?: number; index?: number; payload?: HistoryDataPoint }) => {
+                    const { cx, cy, index, payload } = props;
+                    if (!cx || !cy || index == null || index % ARROW_SAMPLE_INTERVAL !== 0) return <></>;
+                    return <WindArrow cx={cx} cy={cy} direction={payload?.direction ?? null} />;
+                  }
+                : false}
+              strokeWidth={2}
+            />
+          )}
         </LineChart>
       </ResponsiveContainer>
     </div>
