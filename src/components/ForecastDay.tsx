@@ -8,6 +8,7 @@ export interface ForecastDayProps {
   highTemp: number;
   lowTemp: number;
   precipProbability: number;
+  rawHighTempC?: number;
 }
 
 export function ForecastDay({
@@ -17,12 +18,13 @@ export function ForecastDay({
   highTemp,
   lowTemp,
   precipProbability,
+  rawHighTempC,
 }: ForecastDayProps) {
   return (
     <div className="flex flex-col items-center gap-1 rounded-lg border border-gray-200 bg-white p-3 min-w-[90px] shadow-sm">
       <span className="text-xs font-medium text-zinc-500">{dayLabel}</span>
       <span data-testid="weather-emoji" className="text-2xl" title={conditions}>
-        {getWeatherEmoji(icon, conditions, highTemp)}
+        {getWeatherEmoji(icon, conditions, rawHighTempC ?? highTemp)}
       </span>
       <div className="flex gap-2 text-sm">
         <span className="font-bold text-zinc-900">{formatValue("temperature", highTemp)}°</span>

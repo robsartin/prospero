@@ -85,6 +85,7 @@ describe("getWeatherEmoji", () => {
     it("does not override for normal temps", () => {
       expect(getWeatherEmoji("clear-day", "Clear", 25)).toBe("☀️");
     });
+
   });
 
   describe("fallback", () => {

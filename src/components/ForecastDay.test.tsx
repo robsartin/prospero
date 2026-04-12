@@ -22,8 +22,14 @@ describe("ForecastDay", () => {
   });
 
   it("renders freezing emoji for very cold days", () => {
-    render(<ForecastDay {...defaultProps} highTemp={-5} />);
+    render(<ForecastDay {...defaultProps} highTemp={-5} rawHighTempC={-5} />);
     expect(screen.getByTestId("weather-emoji")).toHaveTextContent("🥶");
+  });
+
+  it("uses rawHighTempC for emoji, not display highTemp", () => {
+    // 82.4°F display temp (28°C converted) — should NOT show 🥵
+    render(<ForecastDay {...defaultProps} highTemp={82.4} rawHighTempC={28} icon="clear-day" conditions="Clear" />);
+    expect(screen.getByTestId("weather-emoji")).toHaveTextContent("☀️");
   });
 
   it("renders high and low temperatures with 1 decimal", () => {
