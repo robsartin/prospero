@@ -5,6 +5,7 @@ import TimeRangeSelector from "./TimeRangeSelector";
 import HistoryChart, { type HistoryDataPoint } from "./HistoryChart";
 import RainChart from "./RainChart";
 import LightningChart from "./LightningChart";
+import IlluminanceChart from "./IlluminanceChart";
 import { MetricUnitStrategy, type UnitStrategy } from "@/lib/units";
 import { tempDomain, pressureDomain, zeroBasedDomain } from "@/lib/chartDomain";
 import { getTimeRange, chunkTimeRange, type TimeRange } from "@/lib/timeRanges";
@@ -114,6 +115,7 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
   const humidityData = toChartData(obs, "relativeHumidity", range);
   const rainData = toChartData(obs, "rainAccumulated", range, units.rain, undefined, "precipType");
   const lightningData = toChartData(obs, "lightningStrikeCount", range);
+  const illuminanceData = toChartData(obs, "illuminance", range);
 
   return (
     <div className="space-y-6">
@@ -166,6 +168,10 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
           <LightningChart
             data={lightningData}
             domain={zeroBasedDomain(lightningData)}
+          />
+          <IlluminanceChart
+            data={illuminanceData}
+            domain={zeroBasedDomain(illuminanceData)}
           />
         </div>
       )}
