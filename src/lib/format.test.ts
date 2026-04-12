@@ -1,25 +1,25 @@
 import { formatValue } from "./format";
 
 describe("formatValue", () => {
-  describe("temperature (1 decimal)", () => {
-    it("formats to 1 decimal place", () => {
-      expect(formatValue("temperature", 22.456)).toBe("22.5");
+  describe("temperature (integer)", () => {
+    it("rounds to integer", () => {
+      expect(formatValue("temperature", 22.456)).toBe("22");
     });
 
-    it("preserves 1 decimal when exact", () => {
-      expect(formatValue("temperature", 22.0)).toBe("22.0");
-    });
-  });
-
-  describe("dew_point (1 decimal)", () => {
-    it("formats to 1 decimal place", () => {
-      expect(formatValue("dew_point", 15.678)).toBe("15.7");
+    it("rounds up at .5", () => {
+      expect(formatValue("temperature", 22.5)).toBe("23");
     });
   });
 
-  describe("feels_like (1 decimal)", () => {
-    it("formats to 1 decimal place", () => {
-      expect(formatValue("feels_like", 24.321)).toBe("24.3");
+  describe("dew_point (integer)", () => {
+    it("rounds to integer", () => {
+      expect(formatValue("dew_point", 15.678)).toBe("16");
+    });
+  });
+
+  describe("feels_like (integer)", () => {
+    it("rounds to integer", () => {
+      expect(formatValue("feels_like", 24.321)).toBe("24");
     });
   });
 
