@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { MetricCard } from "./MetricCard";
 import ErrorDisplay from "./ErrorDisplay";
 import { formatValue } from "@/lib/format";
+import { degreesToCompass } from "@/lib/compass";
 import { MetricUnitStrategy, type UnitStrategy } from "@/lib/units";
 import type { ObservationsResponse } from "@/lib/types";
 
@@ -113,7 +114,9 @@ export default function CurrentConditions({ stationId, units = DEFAULT_UNITS }: 
         label="Wind"
         value={formatValue("wind", units.wind(obs.wind_avg))}
         unit={units.labels.wind}
-        secondary={obs.wind_gust != null ? `Gust ${formatValue("wind", units.wind(obs.wind_gust))}` : undefined}
+        secondary={obs.wind_gust != null
+          ? `Gust ${formatValue("wind", units.wind(obs.wind_gust))}${obs.wind_direction != null ? ` ${degreesToCompass(obs.wind_direction)}` : ""}`
+          : undefined}
       />
       <MetricCard
         label="Humidity"
