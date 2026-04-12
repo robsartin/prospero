@@ -15,6 +15,7 @@ export interface HistoryDataPoint {
   time: string;
   value: number;
   direction?: number | null;
+  precipType?: number | null;
 }
 
 export interface HistoryChartProps {

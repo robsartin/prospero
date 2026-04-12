@@ -34,7 +34,8 @@ function toChartData(
   field: keyof TransformedObservation,
   range: TimeRange,
   convert: (v: number) => number = (v) => v,
-  directionField?: keyof TransformedObservation
+  directionField?: keyof TransformedObservation,
+  precipTypeField?: keyof TransformedObservation
 ): HistoryDataPoint[] {
   return obs
     .filter((o) => o[field] != null)
@@ -42,6 +43,7 @@ function toChartData(
       time: formatTime(o.timestamp, range),
       value: convert(o[field] as number),
       direction: directionField ? (o[directionField] as number | null) : undefined,
+      precipType: precipTypeField ? (o[precipTypeField] as number | null) : undefined,
     }));
 }
 
@@ -110,7 +112,7 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
   const pressureData = toChartData(obs, "stationPressure", range, units.pressure);
   const windData = toChartData(obs, "windAvg", range, units.wind, "windDirection");
   const humidityData = toChartData(obs, "relativeHumidity", range);
-  const rainData = toChartData(obs, "rainAccumulated", range, units.rain);
+  const rainData = toChartData(obs, "rainAccumulated", range, units.rain, undefined, "precipType");
   const lightningData = toChartData(obs, "lightningStrikeCount", range);
 
   return (
