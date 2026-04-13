@@ -9,6 +9,7 @@ import IlluminanceChart from "./IlluminanceChart";
 import BatteryChart from "./BatteryChart";
 import { voltageToPercent } from "@/lib/battery";
 import { heatIndexC, windChillC, wetBulbC } from "@/lib/comfortMetrics";
+import { seaLevelPressureMb, barometricPressureMb } from "@/lib/pressureDerivations";
 import { MetricUnitStrategy, type UnitStrategy } from "@/lib/units";
 import { tempDomain, pressureDomain, zeroBasedDomain } from "@/lib/chartDomain";
 import { getTimeRange, chunkTimeRange, type TimeRange } from "@/lib/timeRanges";
@@ -17,6 +18,8 @@ import type { TransformedObservation } from "@/lib/transforms";
 interface HistoryViewProps {
   deviceId: number | null;
   units?: UnitStrategy;
+  elevationM?: number | null;
+  deviceAglM?: number | null;
 }
 
 function formatTime(epoch: number, range: TimeRange): string {
@@ -57,6 +60,29 @@ function toTempSeriesData(
     });
 }
 
+function toPressureSeriesData(
+  obs: TransformedObservation[],
+  range: TimeRange,
+  convertPressure: (v: number) => number,
+  elevationM: number | null,
+  deviceAglM: number | null
+): HistoryDataPoint[] {
+  return obs
+    .filter((o) => o.stationPressure != null)
+    .map((o) => {
+      const p = o.stationPressure as number;
+      const t = o.airTemperature;
+      const sea = seaLevelPressureMb(p, elevationM, t);
+      const baro = barometricPressureMb(p, deviceAglM, t);
+      return {
+        time: formatTime(o.timestamp, range),
+        value: convertPressure(p),
+        barometric: baro != null ? convertPressure(baro) : null,
+        seaLevel: sea != null ? convertPressure(sea) : null,
+      };
+    });
+}
+
 function toChartData(
   obs: TransformedObservation[],
   field: keyof TransformedObservation,
@@ -91,7 +117,12 @@ async function fetchChunk(
 
 const DEFAULT_UNITS = new MetricUnitStrategy();
 
-export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: HistoryViewProps) {
+export default function HistoryView({
+  deviceId,
+  units = DEFAULT_UNITS,
+  elevationM = null,
+  deviceAglM = null,
+}: HistoryViewProps) {
   const [range, setRange] = useState<TimeRange>("today");
   const [obs, setObs] = useState<TransformedObservation[]>([]);
   const [pending, setPending] = useState(false);
@@ -137,7 +168,7 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
   }
 
   const tempData = toTempSeriesData(obs, range, units.temp);
-  const pressureData = toChartData(obs, "stationPressure", range, units.pressure);
+  const pressureData = toPressureSeriesData(obs, range, units.pressure, elevationM, deviceAglM);
   const windData = toChartData(obs, "windAvg", range, units.wind, "windDirection");
   const humidityData = toChartData(obs, "relativeHumidity", range);
   const rainData = toChartData(obs, "rainAccumulated", range, units.rain, undefined, "precipType");
@@ -171,9 +202,13 @@ export default function HistoryView({ deviceId, units = DEFAULT_UNITS }: History
             data={pressureData}
             label="Pressure"
             unit={units.labels.pressure}
-            color="#3b82f6"
             precision={1}
             domain={pressureDomain()}
+            series={[
+              { dataKey: "value", label: "Station", color: "#3b82f6" },
+              { dataKey: "barometric", label: "Barometric", color: "#14b8a6" },
+              { dataKey: "seaLevel", label: "Sea level", color: "#a855f7" },
+            ]}
           />
           <HistoryChart
             data={windData}

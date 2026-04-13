@@ -11,19 +11,23 @@ import HistoryView from "@/components/HistoryView";
 import type { Station } from "@/lib/types";
 import { useUnitPreference } from "@/hooks/useUnitPreference";
 
-function findTempestDeviceId(station: Station): number | null {
-  const stDevice = station.devices?.find((d) => d.device_type === "ST");
-  return stDevice?.device_id ?? null;
+function findTempestDevice(station: Station) {
+  return station.devices?.find((d) => d.device_type === "ST") ?? null;
 }
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("Current");
   const [stationId, setStationId] = useState<number | null>(null);
   const [deviceId, setDeviceId] = useState<number | null>(null);
+  const [elevationM, setElevationM] = useState<number | null>(null);
+  const [deviceAglM, setDeviceAglM] = useState<number | null>(null);
   const { units, setUnits } = useUnitPreference();
 
   const handleStationSelect = useCallback((station: Station) => {
-    setDeviceId(findTempestDeviceId(station));
+    const device = findTempestDevice(station);
+    setDeviceId(device?.device_id ?? null);
+    setDeviceAglM(device?.device_meta?.agl ?? null);
+    setElevationM(station.station_meta?.elevation ?? null);
   }, []);
 
   return (
@@ -47,7 +51,12 @@ export default function Home() {
           <ForecastStrip stationId={stationId} units={units} />
         )}
         {activeTab === "History" && (
-          <HistoryView deviceId={deviceId} units={units} />
+          <HistoryView
+            deviceId={deviceId}
+            units={units}
+            elevationM={elevationM}
+            deviceAglM={deviceAglM}
+          />
         )}
       </main>
     </div>
