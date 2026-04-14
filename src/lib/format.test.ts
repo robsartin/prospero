@@ -85,11 +85,11 @@ describe("formatValue", () => {
 
   describe("null handling", () => {
     it("returns '--' for null", () => {
-      expect(formatValue("temperature", null as unknown as number)).toBe("--");
+      expect(formatValue("temperature", null)).toBe("--");
     });
 
     it("returns '--' for undefined", () => {
-      expect(formatValue("temperature", undefined as unknown as number)).toBe("--");
+      expect(formatValue("temperature", undefined)).toBe("--");
     });
   });
 });

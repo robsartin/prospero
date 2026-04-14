@@ -71,32 +71,32 @@ export interface ObservationSummary {
 
 export interface StationObservation {
   timestamp: number;
-  air_temperature: number;
-  barometric_pressure: number;
-  station_pressure: number;
-  sea_level_pressure: number;
-  relative_humidity: number;
-  precip: number;
-  precip_accum_last_1hr: number;
-  precip_accum_local_day: number;
-  wind_avg: number;
-  wind_direction: number;
-  wind_gust: number;
-  wind_lull: number;
-  solar_radiation: number;
-  uv: number;
-  brightness: number;
-  lightning_strike_last_epoch: number;
-  lightning_strike_last_distance: number;
-  lightning_strike_count: number;
-  lightning_strike_count_last_1hr: number;
-  lightning_strike_count_last_3hr: number;
-  feels_like: number;
-  heat_index: number;
-  wind_chill: number;
-  dew_point: number;
-  wet_bulb_temperature: number;
-  pressure_trend: string;
+  air_temperature: number | null;
+  barometric_pressure: number | null;
+  station_pressure: number | null;
+  sea_level_pressure: number | null;
+  relative_humidity: number | null;
+  precip: number | null;
+  precip_accum_last_1hr: number | null;
+  precip_accum_local_day: number | null;
+  wind_avg: number | null;
+  wind_direction: number | null;
+  wind_gust: number | null;
+  wind_lull: number | null;
+  solar_radiation: number | null;
+  uv: number | null;
+  brightness: number | null;
+  lightning_strike_last_epoch: number | null;
+  lightning_strike_last_distance: number | null;
+  lightning_strike_count: number | null;
+  lightning_strike_count_last_1hr: number | null;
+  lightning_strike_count_last_3hr: number | null;
+  feels_like: number | null;
+  heat_index: number | null;
+  wind_chill: number | null;
+  dew_point: number | null;
+  wet_bulb_temperature: number | null;
+  pressure_trend: string | null;
 }
 
 export interface ObservationsResponse {

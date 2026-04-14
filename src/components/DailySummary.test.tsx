@@ -28,9 +28,9 @@ describe("DailySummary", () => {
 
   it("handles null values gracefully", () => {
     const partial: Partial<StationObservation> = {
-      air_temperature: null as unknown as number,
-      precip_accum_local_day: null as unknown as number,
-      wind_gust: null as unknown as number,
+      air_temperature: null,
+      precip_accum_local_day: null,
+      wind_gust: null,
     };
     render(<DailySummary observation={partial as StationObservation} />);
     const summary = screen.getByTestId("daily-summary");
