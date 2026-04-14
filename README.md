@@ -109,6 +109,19 @@ TEMPEST_STATION_ID=your_station_id_here
 
 **Find your station ID:** Settings > Stations — the ID is in the URL or station details.
 
+### Working in a git worktree
+
+When using `git worktree add` for parallel branches, each worktree needs its own `node_modules` and `.env.local`:
+
+```bash
+git worktree add ../prospero-wt/my-branch -b my-branch main
+cd ../prospero-wt/my-branch
+npm ci
+cp /path/to/main/checkout/.env.local .
+```
+
+Don't symlink `node_modules` from another checkout — Turbopack rejects symlinks pointing outside the project root and `next dev` will panic. `.env.local` can be symlinked or copied.
+
 ## Run Locally
 
 ```bash
