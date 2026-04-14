@@ -8,6 +8,8 @@ import LightningChart from "./LightningChart";
 import IlluminanceChart from "./IlluminanceChart";
 import BatteryChart from "./BatteryChart";
 import { voltageToPercent } from "@/lib/battery";
+import { downsampleObs } from "@/lib/downsample";
+import HistorySkeleton from "./HistorySkeleton";
 import { heatIndexC, windChillC, wetBulbC } from "@/lib/comfortMetrics";
 import { seaLevelPressureMb, barometricPressureMb } from "@/lib/pressureDerivations";
 import { MetricUnitStrategy, type UnitStrategy } from "@/lib/units";
@@ -116,6 +118,7 @@ async function fetchChunk(
 }
 
 const DEFAULT_UNITS = new MetricUnitStrategy();
+const TARGET_BUCKETS = 500;
 
 export default function HistoryView({
   deviceId,
@@ -140,7 +143,7 @@ export default function HistoryView({
         );
 
         if (!signal.aborted) {
-          setObs(results.flat());
+          setObs(downsampleObs(results.flat(), TARGET_BUCKETS));
           setError(null);
         }
       } catch (err) {
@@ -180,7 +183,7 @@ export default function HistoryView({
     <div className="space-y-6">
       <TimeRangeSelector selected={range} onChange={setRange} />
 
-      {pending && <p data-testid="loading">Loading history...</p>}
+      {pending && <HistorySkeleton />}
       {error && <p data-testid="error" className="text-red-500">Error: {error}</p>}
 
       {!pending && !error && (
