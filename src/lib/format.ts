@@ -25,7 +25,7 @@ const PRECISION: Record<MetricKind, number> = {
   rain: 2,
 };
 
-export function formatValue(kind: MetricKind, value: number): string {
+export function formatValue(kind: MetricKind, value: number | null | undefined): string {
   if (value == null) return "--";
   return value.toFixed(PRECISION[kind]);
 }

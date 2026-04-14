@@ -106,13 +106,13 @@ export default function CurrentConditions({ stationId, units = DEFAULT_UNITS }: 
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
       <MetricCard
         label="Temperature"
-        value={formatValue("temperature", units.temp(obs.air_temperature))}
+        value={formatValue("temperature", obs.air_temperature == null ? null : units.temp(obs.air_temperature))}
         unit={units.labels.temp}
         secondary={obs.feels_like != null ? `Feels ${formatValue("feels_like", units.temp(obs.feels_like))}°` : undefined}
       />
       <MetricCard
         label="Wind"
-        value={formatValue("wind", units.wind(obs.wind_avg))}
+        value={formatValue("wind", obs.wind_avg == null ? null : units.wind(obs.wind_avg))}
         unit={units.labels.wind}
         secondary={obs.wind_gust != null
           ? `Gust ${formatValue("wind", units.wind(obs.wind_gust))}${obs.wind_direction != null ? ` ${degreesToCompass(obs.wind_direction)}` : ""}`
@@ -126,7 +126,7 @@ export default function CurrentConditions({ stationId, units = DEFAULT_UNITS }: 
       />
       <MetricCard
         label="Pressure"
-        value={formatValue("pressure", units.pressure(obs.sea_level_pressure))}
+        value={formatValue("pressure", obs.sea_level_pressure == null ? null : units.pressure(obs.sea_level_pressure))}
         unit={units.labels.pressure}
         secondary={obs.pressure_trend ?? undefined}
       />
@@ -138,7 +138,7 @@ export default function CurrentConditions({ stationId, units = DEFAULT_UNITS }: 
       />
       <MetricCard
         label="Rain Today"
-        value={formatValue("rain", units.rain(obs.precip_accum_local_day))}
+        value={formatValue("rain", obs.precip_accum_local_day == null ? null : units.rain(obs.precip_accum_local_day))}
         unit={units.labels.rain}
       />
       <MetricCard
