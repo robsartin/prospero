@@ -27,6 +27,16 @@ describe("seaLevelPressureMb", () => {
     expect(seaLevelPressureMb(1000, null, 15)).toBeNull();
     expect(seaLevelPressureMb(1000, 100, null)).toBeNull();
   });
+
+  it("returns null for implausible elevation", () => {
+    expect(seaLevelPressureMb(1000, 20000, 15)).toBeNull();
+    expect(seaLevelPressureMb(1000, -2000, 15)).toBeNull();
+  });
+
+  it("returns null for implausible temperature", () => {
+    expect(seaLevelPressureMb(1000, 100, -100)).toBeNull();
+    expect(seaLevelPressureMb(1000, 100, 100)).toBeNull();
+  });
 });
 
 describe("barometricPressureMb", () => {
@@ -43,5 +53,10 @@ describe("barometricPressureMb", () => {
   it("returns null for null inputs", () => {
     expect(barometricPressureMb(null, 2, 15)).toBeNull();
     expect(barometricPressureMb(1000, null, 15)).toBeNull();
+  });
+
+  it("returns null for implausible AGL", () => {
+    expect(barometricPressureMb(1000, 1000, 15)).toBeNull();
+    expect(barometricPressureMb(1000, -5, 15)).toBeNull();
   });
 });
