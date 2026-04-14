@@ -34,11 +34,8 @@ function sum(values: number[]): number | null {
 }
 
 function aggregateBucket(bucket: TransformedObservation[]): TransformedObservation {
-  const midIdx = Math.floor(bucket.length / 2);
   const timestamp =
-    bucket.length % 2 === 0
-      ? (bucket[midIdx - 1].timestamp + bucket[midIdx].timestamp) / 2
-      : bucket[midIdx].timestamp;
+    (bucket[0].timestamp + bucket[bucket.length - 1].timestamp) / 2;
 
   const out: TransformedObservation = {
     timestamp,
