@@ -107,11 +107,23 @@ describe("downsampleObs", () => {
     expect(result[0].airTemperature).toBeNull();
   });
 
-  it("uses bucket midpoint timestamp", () => {
+  it("uses bucket midpoint timestamp for even bucket sizes", () => {
     const input = [obs(100), obs(200), obs(300), obs(400)];
     const result = downsampleObs(input, 2);
     expect(result[0].timestamp).toBe(150);
     expect(result[1].timestamp).toBe(350);
+  });
+
+  it("uses bucket midpoint timestamp for odd bucket sizes", () => {
+    const input = [obs(100), obs(200), obs(300)];
+    const result = downsampleObs(input, 1);
+    expect(result[0].timestamp).toBe(200);
+  });
+
+  it("uses true time midpoint for irregularly spaced obs", () => {
+    const input = [obs(100), obs(110), obs(120), obs(500)];
+    const result = downsampleObs(input, 1);
+    expect(result[0].timestamp).toBe(300);
   });
 
   it("returns empty array for empty input", () => {
