@@ -206,7 +206,7 @@ export default function HistoryView({
             label="Pressure"
             unit={units.labels.pressure}
             precision={1}
-            domain={pressureDomain()}
+            domain={pressureDomain(pressureData)}
             series={[
               { dataKey: "value", label: "Station", color: "#3b82f6" },
               { dataKey: "barometric", label: "Barometric", color: "#14b8a6" },
