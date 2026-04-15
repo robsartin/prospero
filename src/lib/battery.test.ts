@@ -22,7 +22,13 @@ describe("voltageToPercent", () => {
     expect(Number.isInteger(voltageToPercent(2.51))).toBe(true);
   });
 
-  it("returns null for null input", () => {
+  it("returns null for null input, never 0", () => {
     expect(voltageToPercent(null)).toBeNull();
+    expect(voltageToPercent(null)).not.toBe(0);
+  });
+
+  it("typed overload: non-null input returns non-null number", () => {
+    const pct: number = voltageToPercent(2.6);
+    expect(pct).toBe(50);
   });
 });
