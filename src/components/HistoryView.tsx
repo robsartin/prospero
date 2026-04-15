@@ -177,7 +177,7 @@ export default function HistoryView({
   const rainData = toChartData(obs, "rainAccumulated", range, units.rain, undefined, "precipType");
   const lightningData = toChartData(obs, "lightningStrikeCount", range);
   const illuminanceData = toChartData(obs, "illuminance", range);
-  const batteryData = toChartData(obs, "battery", range, (v) => voltageToPercent(v) ?? 0);
+  const batteryData = toChartData(obs, "battery", range, (v) => voltageToPercent(v));
 
   return (
     <div className="space-y-6">
