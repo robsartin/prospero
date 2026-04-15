@@ -43,21 +43,22 @@ function toTempSeriesData(
   range: TimeRange,
   convertTemp: (v: number) => number
 ): HistoryDataPoint[] {
-  return obs
-    .filter((o) => o.airTemperature != null)
-    .map((o) => {
-      const t = o.airTemperature as number;
-      const hi = o.heatIndexC ?? null;
-      const wc = o.windChillC ?? null;
-      const wb = o.wetBulbC ?? null;
-      return {
+  return obs.flatMap((o) => {
+    const t = o.airTemperature;
+    if (t == null) return [];
+    const hi = o.heatIndexC ?? null;
+    const wc = o.windChillC ?? null;
+    const wb = o.wetBulbC ?? null;
+    return [
+      {
         time: formatTime(o.timestamp, range),
         value: convertTemp(t),
         heatIndex: hi != null ? convertTemp(hi) : null,
         windChill: wc != null ? convertTemp(wc) : null,
         wetBulb: wb != null ? convertTemp(wb) : null,
-      };
-    });
+      },
+    ];
+  });
 }
 
 function toPressureSeriesData(
@@ -67,38 +68,45 @@ function toPressureSeriesData(
   elevationM: number | null,
   deviceAglM: number | null
 ): HistoryDataPoint[] {
-  return obs
-    .filter((o) => o.stationPressure != null)
-    .map((o) => {
-      const p = o.stationPressure as number;
-      const t = o.airTemperature;
-      const sea = seaLevelPressureMb(p, elevationM, t);
-      const baro = barometricPressureMb(p, deviceAglM, t);
-      return {
+  return obs.flatMap((o) => {
+    const p = o.stationPressure;
+    if (p == null) return [];
+    const t = o.airTemperature;
+    const sea = seaLevelPressureMb(p, elevationM, t);
+    const baro = barometricPressureMb(p, deviceAglM, t);
+    return [
+      {
         time: formatTime(o.timestamp, range),
         value: convertPressure(p),
         barometric: baro != null ? convertPressure(baro) : null,
         seaLevel: sea != null ? convertPressure(sea) : null,
-      };
-    });
+      },
+    ];
+  });
 }
+
+type Getter = (o: TransformedObservation) => number | null | undefined;
 
 function toChartData(
   obs: TransformedObservation[],
-  field: keyof TransformedObservation,
+  getValue: Getter,
   range: TimeRange,
   convert: (v: number) => number = (v) => v,
-  directionField?: keyof TransformedObservation,
-  precipTypeField?: keyof TransformedObservation
+  getDirection?: Getter,
+  getPrecipType?: Getter
 ): HistoryDataPoint[] {
-  return obs
-    .filter((o) => o[field] != null)
-    .map((o) => ({
-      time: formatTime(o.timestamp, range),
-      value: convert(o[field] as number),
-      direction: directionField ? (o[directionField] as number | null) : undefined,
-      precipType: precipTypeField ? (o[precipTypeField] as number | null) : undefined,
-    }));
+  return obs.flatMap((o) => {
+    const v = getValue(o);
+    if (v == null) return [];
+    return [
+      {
+        time: formatTime(o.timestamp, range),
+        value: convert(v),
+        direction: getDirection ? getDirection(o) ?? null : undefined,
+        precipType: getPrecipType ? getPrecipType(o) ?? null : undefined,
+      },
+    ];
+  });
 }
 
 async function fetchChunk(
@@ -171,12 +179,12 @@ export default function HistoryView({
 
   const tempData = toTempSeriesData(obs, range, units.temp);
   const pressureData = toPressureSeriesData(obs, range, units.pressure, elevationM, deviceAglM);
-  const windData = toChartData(obs, "windAvg", range, units.wind, "windDirection");
-  const humidityData = toChartData(obs, "relativeHumidity", range);
-  const rainData = toChartData(obs, "rainAccumulated", range, units.rain, undefined, "precipType");
-  const lightningData = toChartData(obs, "lightningStrikeCount", range);
-  const illuminanceData = toChartData(obs, "illuminance", range);
-  const batteryData = toChartData(obs, "battery", range, (v) => voltageToPercent(v));
+  const windData = toChartData(obs, (o) => o.windAvg, range, units.wind, (o) => o.windDirection);
+  const humidityData = toChartData(obs, (o) => o.relativeHumidity, range);
+  const rainData = toChartData(obs, (o) => o.rainAccumulated, range, units.rain, undefined, (o) => o.precipType);
+  const lightningData = toChartData(obs, (o) => o.lightningStrikeCount, range);
+  const illuminanceData = toChartData(obs, (o) => o.illuminance, range);
+  const batteryData = toChartData(obs, (o) => o.battery, range, (v) => voltageToPercent(v));
 
   return (
     <div className="space-y-6">
