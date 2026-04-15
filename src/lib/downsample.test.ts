@@ -129,4 +129,25 @@ describe("downsampleObs", () => {
   it("returns empty array for empty input", () => {
     expect(downsampleObs([], 100)).toEqual([]);
   });
+
+  it("preserves pre-derived heat index (mean of HI, not HI of mean)", () => {
+    const spike = [
+      obs(1, { airTemperature: 25, relativeHumidity: 50, heatIndexC: null }),
+      obs(2, { airTemperature: 33, relativeHumidity: 70, heatIndexC: 43 }),
+      obs(3, { airTemperature: 25, relativeHumidity: 50, heatIndexC: null }),
+      obs(4, { airTemperature: 33, relativeHumidity: 70, heatIndexC: 43 }),
+    ];
+    const [bucket] = downsampleObs(spike, 1);
+    expect(bucket.heatIndexC).toBeCloseTo(43, 0);
+  });
+
+  it("averages windChillC and wetBulbC across a bucket", () => {
+    const input = [
+      obs(1, { windChillC: -10, wetBulbC: 15 }),
+      obs(2, { windChillC: -20, wetBulbC: 17 }),
+    ];
+    const [bucket] = downsampleObs(input, 1);
+    expect(bucket.windChillC).toBe(-15);
+    expect(bucket.wetBulbC).toBe(16);
+  });
 });
