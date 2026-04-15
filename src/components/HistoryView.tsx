@@ -176,7 +176,7 @@ export default function HistoryView({
   const rainData = toChartData(obs, "rainAccumulated", range, units.rain, undefined, "precipType");
   const lightningData = toChartData(obs, "lightningStrikeCount", range);
   const illuminanceData = toChartData(obs, "illuminance", range);
-  const batteryData = toChartData(obs, "battery", range, (v) => voltageToPercent(v) ?? 0);
+  const batteryData = toChartData(obs, "battery", range, (v) => voltageToPercent(v));
 
   return (
     <div className="space-y-6">
@@ -205,7 +205,7 @@ export default function HistoryView({
             label="Pressure"
             unit={units.labels.pressure}
             precision={1}
-            domain={pressureDomain()}
+            domain={pressureDomain(pressureData)}
             series={[
               { dataKey: "value", label: "Station", color: "#3b82f6" },
               { dataKey: "barometric", label: "Barometric", color: "#14b8a6" },
