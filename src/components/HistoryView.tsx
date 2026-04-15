@@ -10,7 +10,7 @@ import BatteryChart from "./BatteryChart";
 import { voltageToPercent } from "@/lib/battery";
 import { downsampleObs } from "@/lib/downsample";
 import HistorySkeleton from "./HistorySkeleton";
-import { heatIndexC, windChillC, wetBulbC } from "@/lib/comfortMetrics";
+import { enrichObservation } from "@/lib/enrichObservation";
 import { seaLevelPressureMb, barometricPressureMb } from "@/lib/pressureDerivations";
 import { MetricUnitStrategy, type UnitStrategy } from "@/lib/units";
 import { tempDomain, pressureDomain, zeroBasedDomain } from "@/lib/chartDomain";
@@ -47,11 +47,9 @@ function toTempSeriesData(
     .filter((o) => o.airTemperature != null)
     .map((o) => {
       const t = o.airTemperature as number;
-      const rh = o.relativeHumidity;
-      const w = o.windAvg;
-      const hi = heatIndexC(t, rh);
-      const wc = windChillC(t, w);
-      const wb = wetBulbC(t, rh);
+      const hi = o.heatIndexC ?? null;
+      const wc = o.windChillC ?? null;
+      const wb = o.wetBulbC ?? null;
       return {
         time: formatTime(o.timestamp, range),
         value: convertTemp(t),
@@ -143,7 +141,8 @@ export default function HistoryView({
         );
 
         if (!signal.aborted) {
-          setObs(downsampleObs(results.flat(), TARGET_BUCKETS));
+          const enriched = results.flat().map(enrichObservation);
+          setObs(downsampleObs(enriched, TARGET_BUCKETS));
           setError(null);
         }
       } catch (err) {

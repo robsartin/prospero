@@ -21,6 +21,9 @@ const NUMERIC_FIELDS: (keyof TransformedObservation)[] = [
   "lightningStrikeAvgDistance",
   "battery",
   "reportInterval",
+  "heatIndexC",
+  "windChillC",
+  "wetBulbC",
 ];
 
 function mean(values: number[]): number | null {

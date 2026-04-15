@@ -43,6 +43,11 @@ export interface TransformedObservation {
   lightningStrikeCount: number | null;
   battery: number | null;
   reportInterval: number | null;
+  // Optional derived fields, populated by enrichObservation after transform.
+  // Null when the formula's domain isn't met or when inputs are missing.
+  heatIndexC?: number | null;
+  windChillC?: number | null;
+  wetBulbC?: number | null;
 }
 
 export function transformObservation(raw: (number | null)[]): TransformedObservation {
