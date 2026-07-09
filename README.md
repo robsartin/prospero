@@ -130,6 +130,40 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000). The app auto-selects your first station and refreshes conditions every 60 seconds. Click the °C/°F button to toggle units.
 
+## Download / Export
+
+The **Download** tab exports station data as CSV or JSON over a chosen date range.
+It calls `GET /api/export`:
+
+| Param | Notes |
+|-------|-------|
+| `device_id` | required |
+| `start`, `end` | epoch seconds; span capped at 366 days |
+| `metrics` | comma list of registry keys (e.g. `rain`) |
+| `granularity` | `daily` (only value supported today) |
+| `format` | `csv` (default) or `json` |
+| `units` | `metric` (default) or `imperial` |
+| `tz_offset` | station timezone offset in minutes, for local-day bucketing |
+
+Both formats carry units so a consumer can tell metric from imperial. CSV puts the
+unit in the header (`Rain (mm)` vs `Rain (in)`). JSON mirrors this as a
+`{ columns, rows }` object rather than a bare array:
+
+```json
+{
+  "columns": [
+    { "key": "date", "header": "date" },
+    { "key": "rain", "header": "Rain (mm)" }
+  ],
+  "rows": [{ "date": "2026-01-01", "rain": 0.3 }]
+}
+```
+
+Row keys stay clean and stable; `columns[].header` carries the unit-bearing label.
+
+Add a new metric by appending one entry to `EXPORT_METRICS` in
+`src/lib/export/registry.ts` (field extractor + unit conversion + daily reducer).
+
 ## Development Rules
 
 ### TDD is mandatory
@@ -337,3 +371,4 @@ See `docs/adr/` for all ADRs:
 | [0008](docs/adr/0008-unit-strategy.md) | Strategy pattern for unit conversions |
 | [0009](docs/adr/0009-display-precision.md) | Per-metric display precision rules |
 | [0010](docs/adr/0010-history-chunking.md) | 5-day chunked history requests |
+| [0012](docs/adr/0012-data-export.md) | Data export endpoint + metric registry |

@@ -40,4 +40,9 @@ describe("NavTabs", () => {
     expect(forecastTab).toHaveAttribute("aria-selected", "true");
     expect(currentTab).toHaveAttribute("aria-selected", "false");
   });
+
+  it("renders a Download tab", () => {
+    render(<NavTabs {...defaultProps} />);
+    expect(screen.getByRole("tab", { name: "Download" })).toBeInTheDocument();
+  });
 });

@@ -38,6 +38,11 @@ export function getTimeRange(
 
 /**
  * Splits a time range into chunks of at most 5 days (Tempest API limit).
+ *
+ * Tempest treats time_start/time_end as inclusive, so each chunk starts one
+ * second after the previous chunk's end. Otherwise an observation landing
+ * exactly on a chunk boundary would be returned by both fetches, double-counting
+ * `sum` reducers (rain, lightning) and producing duplicate history points.
  */
 export function chunkTimeRange(
   start: number,
@@ -48,7 +53,7 @@ export function chunkTimeRange(
   while (cursor < end) {
     const chunkEnd = Math.min(cursor + MAX_CHUNK, end);
     chunks.push([cursor, chunkEnd]);
-    cursor = chunkEnd;
+    cursor = chunkEnd + 1;
   }
   return chunks;
 }
