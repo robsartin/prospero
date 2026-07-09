@@ -60,7 +60,7 @@ describe("chunkTimeRange", () => {
     expect(chunks).toHaveLength(2);
     expect(chunks[0][0]).toBe(start);
     expect(chunks[0][1]).toBe(start + FIVE_DAYS);
-    expect(chunks[1][0]).toBe(start + FIVE_DAYS);
+    expect(chunks[1][0]).toBe(start + FIVE_DAYS + 1);
     expect(chunks[1][1]).toBe(end);
   });
 
@@ -86,7 +86,17 @@ describe("chunkTimeRange", () => {
     expect(chunks[0][0]).toBe(start);
     expect(chunks[chunks.length - 1][1]).toBe(end);
     for (let i = 1; i < chunks.length; i++) {
-      expect(chunks[i][0]).toBe(chunks[i - 1][1]);
+      expect(chunks[i][0]).toBe(chunks[i - 1][1] + 1);
     }
+  });
+
+  it("adjacent chunks do not share a boundary timestamp", () => {
+    // Tempest treats time_start/time_end as inclusive, so a boundary
+    // timestamp shared by two chunks would be fetched twice. Each chunk
+    // must start one second after the previous chunk's inclusive end.
+    const start = 1000;
+    const end = start + 10 * 86400;
+    const chunks = chunkTimeRange(start, end);
+    expect(chunks[1][0]).toBe(chunks[0][1] + 1);
   });
 });
