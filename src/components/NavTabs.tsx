@@ -1,4 +1,4 @@
-const TABS = ["Current", "Forecast", "History"] as const;
+const TABS = ["Current", "Forecast", "History", "Download"] as const;
 
 export interface NavTabsProps {
   activeTab: string;

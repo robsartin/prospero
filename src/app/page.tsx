@@ -8,6 +8,7 @@ import UnitToggle from "@/components/UnitToggle";
 import CurrentConditions from "@/components/CurrentConditions";
 import ForecastStrip from "@/components/ForecastStrip";
 import HistoryView from "@/components/HistoryView";
+import DownloadPanel from "@/components/DownloadPanel";
 import type { Station } from "@/lib/types";
 import { useUnitPreference } from "@/hooks/useUnitPreference";
 
@@ -21,6 +22,7 @@ export default function Home() {
   const [deviceId, setDeviceId] = useState<number | null>(null);
   const [elevationM, setElevationM] = useState<number | null>(null);
   const [deviceAglM, setDeviceAglM] = useState<number | null>(null);
+  const [tzOffsetMinutes, setTzOffsetMinutes] = useState<number>(0);
   const { units, setUnits } = useUnitPreference();
 
   const handleStationSelect = useCallback((station: Station) => {
@@ -28,6 +30,7 @@ export default function Home() {
     setDeviceId(device?.device_id ?? null);
     setDeviceAglM(device?.device_meta?.agl ?? null);
     setElevationM(station.station_meta?.elevation ?? null);
+    setTzOffsetMinutes(station.timezone_offset_minutes ?? 0);
   }, []);
 
   return (
@@ -56,6 +59,13 @@ export default function Home() {
             units={units}
             elevationM={elevationM}
             deviceAglM={deviceAglM}
+          />
+        )}
+        {activeTab === "Download" && (
+          <DownloadPanel
+            deviceId={deviceId}
+            units={units}
+            tzOffsetMinutes={tzOffsetMinutes}
           />
         )}
       </main>
