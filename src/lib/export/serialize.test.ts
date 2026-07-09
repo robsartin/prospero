@@ -25,7 +25,13 @@ describe("serialize", () => {
     expect(toCsv(t)).toBe('date,"Note, and ""q"""\n2026-01-01,"a,b"');
   });
 
-  it("renders JSON as the rows array", () => {
-    expect(JSON.parse(toJson(table))).toEqual(table.rows);
+  it("renders JSON as a { columns, rows } object so consumers get units from column headers", () => {
+    expect(JSON.parse(toJson(table))).toEqual({
+      columns: [
+        { key: "date", header: "date" },
+        { key: "rain", header: "Rain (mm)" },
+      ],
+      rows: table.rows,
+    });
   });
 });

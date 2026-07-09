@@ -18,5 +18,5 @@ export function toCsv(table: ExportTable): string {
 }
 
 export function toJson(table: ExportTable): string {
-  return JSON.stringify(table.rows, null, 2);
+  return JSON.stringify({ columns: table.columns, rows: table.rows }, null, 2);
 }

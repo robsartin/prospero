@@ -145,6 +145,22 @@ It calls `GET /api/export`:
 | `units` | `metric` (default) or `imperial` |
 | `tz_offset` | station timezone offset in minutes, for local-day bucketing |
 
+Both formats carry units so a consumer can tell metric from imperial. CSV puts the
+unit in the header (`Rain (mm)` vs `Rain (in)`). JSON mirrors this as a
+`{ columns, rows }` object rather than a bare array:
+
+```json
+{
+  "columns": [
+    { "key": "date", "header": "date" },
+    { "key": "rain", "header": "Rain (mm)" }
+  ],
+  "rows": [{ "date": "2026-01-01", "rain": 0.3 }]
+}
+```
+
+Row keys stay clean and stable; `columns[].header` carries the unit-bearing label.
+
 Add a new metric by appending one entry to `EXPORT_METRICS` in
 `src/lib/export/registry.ts` (field extractor + unit conversion + daily reducer).
 

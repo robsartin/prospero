@@ -48,7 +48,13 @@ describe("GET /api/export", () => {
       createRequest("/api/export?device_id=9&start=1767225600&end=1767250000&metrics=rain&format=json")
     );
     expect(res.headers.get("Content-Type")).toBe("application/json");
-    expect(JSON.parse(await res.text())).toEqual([{ date: "2026-01-01", rain: 1 }]);
+    expect(JSON.parse(await res.text())).toEqual({
+      columns: [
+        { key: "date", header: "date" },
+        { key: "rain", header: "Rain (mm)" },
+      ],
+      rows: [{ date: "2026-01-01", rain: 1 }],
+    });
   });
 
   it("fans out across 5-day chunks", async () => {
