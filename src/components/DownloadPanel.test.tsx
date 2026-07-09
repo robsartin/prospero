@@ -37,6 +37,11 @@ describe("DownloadPanel", () => {
     expect(url).toContain("units=metric");
     expect(url).toContain("tz_offset=-420");
     expect(url).toContain("format=csv");
+    // Fetched window must align to the station's LOCAL days, not UTC days:
+    // UTC-midnight epochs shifted by -tzOffsetMinutes*60 so the window covers
+    // local day boundaries at UTC-7 (tzOffsetMinutes=-420).
+    expect(url).toContain("start=1767250800");
+    expect(url).toContain("end=1769929199");
   });
 
   it("shows the server error message when the request fails", async () => {

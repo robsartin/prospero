@@ -12,11 +12,11 @@ interface DownloadPanelProps {
   tzOffsetMinutes?: number;
 }
 
-function toStartEpoch(date: string): number {
-  return Math.floor(Date.parse(`${date}T00:00:00Z`) / 1000);
+function toStartEpoch(date: string, tzOffsetMinutes: number): number {
+  return Math.floor(Date.parse(`${date}T00:00:00Z`) / 1000) - tzOffsetMinutes * 60;
 }
-function toEndEpoch(date: string): number {
-  return Math.floor(Date.parse(`${date}T23:59:59Z`) / 1000);
+function toEndEpoch(date: string, tzOffsetMinutes: number): number {
+  return Math.floor(Date.parse(`${date}T23:59:59Z`) / 1000) - tzOffsetMinutes * 60;
 }
 
 export default function DownloadPanel({
@@ -32,8 +32,8 @@ export default function DownloadPanel({
   const [format, setFormat] = useState<"csv" | "json">("csv");
   const [error, setError] = useState<string | null>(null);
 
-  const startEpoch = start ? toStartEpoch(start) : null;
-  const endEpoch = end ? toEndEpoch(end) : null;
+  const startEpoch = start ? toStartEpoch(start, tzOffsetMinutes) : null;
+  const endEpoch = end ? toEndEpoch(end, tzOffsetMinutes) : null;
   const datesOk = startEpoch != null && endEpoch != null && endEpoch > startEpoch;
   const canDownload = deviceId != null && datesOk && selected.size > 0;
 
