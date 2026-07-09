@@ -146,8 +146,10 @@ oversized request never fans out.
   Download button.
 - Reads `deviceId`, `station.timezone_offset_minutes`, and the current `UnitStrategy`
   from `page.tsx` state (already tracked there).
-- Client-side validation mirrors the server: Download disabled with a hint when
-  `end < start`, span > 366 days, or no metric selected. Server remains the real gate.
+- Client-side validation gates the obvious cases: Download disabled with a hint when
+  there is no device, no start/end date, `end < start`, or no metric selected. The
+  **366-day cap is server-authoritative** — an over-long range is sent and the server's
+  error is surfaced in the panel (avoids duplicating the limit in two places).
 - Download trigger uses `fetch()` (not a bare `<a download>`) so a `!res.ok` response is
   parsed and shown via the app's `ErrorDisplay`/inline message; on success the response
   becomes a `Blob` → object URL → synthetic `<a download>` click. Daily files are tiny,
